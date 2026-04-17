@@ -564,12 +564,10 @@ export default function QuinceInvitation() {
 
   // ── Toca la pantalla → siguiente sección ──
   const handleScreenTap = (e) => {
-    // Ignorar si toca un elemento interactivo
     const tag = e.target.tagName.toLowerCase();
     const interactive = ["button","input","label","a","select","textarea","svg","path","circle","ellipse","rect","line"];
     if (interactive.includes(tag)) return;
     if (e.target.closest("button,input,label,a,select,textarea,[data-noscroll]")) return;
-    // Avanzar a la siguiente sección (si no es la última, regresa a inicio)
     const next = active < 5 ? active + 1 : 0;
     scrollTo(next);
   };
@@ -964,7 +962,7 @@ export default function QuinceInvitation() {
         </div>
 
         {/* Footer — presiona 5 veces para panel admin */}
-        <div onClick={footerTap} style={{ marginTop: 58, textAlign: "center", opacity: .3, cursor: "default", userSelect: "none" }}>
+        <div onClick={footerTap} data-noscroll="true" style={{ marginTop: 58, textAlign: "center", opacity: .3, cursor: "default", userSelect: "none" }}>
           <Divider />
           <div style={{ height: 12 }} />
           <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".38em", color: C.gold }}>♛ ABBY XV AÑOS · 13 JUNIO 2026 ♛</p>
