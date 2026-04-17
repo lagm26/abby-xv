@@ -932,7 +932,7 @@ export default function QuinceInvitation() {
             <div style={{ border: `1px solid rgba(201,168,76,.18)`, borderRadius: 16, padding: "30px 22px", background: "rgba(255,255,255,.03)", display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ textAlign: "left" }}>
                 <label style={{ display: "block", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".22em", color: C.gold, marginBottom: 8 }}>NOMBRE O FAMILIA</label>
-                <input value={guestName} onChange={e => setGuestName(e.target.value)} style={{ width: "100%", background: "rgba(255,255,255,.05)", border: `1px solid rgba(201,168,76,.28)`, borderRadius: 8, padding: "12px 16px", color: C.white, fontSize: "clamp(15px,2.8vw,18px)", fontFamily: "'Cormorant Garamond',serif", transition: "all .25s" }} />
+                <input value={guestName} readOnly style={{ width: "100%", background: "rgba(255,255,255,.03)", border: `1px solid rgba(201,168,76,.2)`, borderRadius: 8, padding: "12px 16px", color: C.goldLight, fontSize: "clamp(15px,2.8vw,18px)", fontFamily: "'Cormorant Garamond',serif", cursor: "default", userSelect: "none" }} />
               </div>
 
               <div>
