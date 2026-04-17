@@ -388,6 +388,18 @@ export default function QuinceInvitation() {
   };
 
   const scrollTo = i => secRefs.current[i]?.scrollIntoView({ behavior: "smooth" });
+
+  // ── Toca la pantalla → siguiente sección ──
+  const handleScreenTap = (e) => {
+    // Ignorar si toca un elemento interactivo
+    const tag = e.target.tagName.toLowerCase();
+    const interactive = ["button","input","label","a","select","textarea","svg","path","circle","ellipse","rect","line"];
+    if (interactive.includes(tag)) return;
+    if (e.target.closest("button,input,label,a,select,textarea,[data-noscroll]")) return;
+    // Avanzar a la siguiente sección (si no es la última, regresa a inicio)
+    const next = active < 4 ? active + 1 : 0;
+    scrollTo(next);
+  };
   const footerTap = () => setAdminTaps(t => { if (t + 1 >= 5) { setShowAdmin(true); loadRsvps(); return 0; } return t + 1; });
   const rv = i => visible[i] ? "fu" : "";
 
@@ -402,7 +414,7 @@ export default function QuinceInvitation() {
   const Divider = () => <div style={{ width: 100, height: 1, background: `linear-gradient(90deg,transparent,${C.gold},transparent)`, margin: "0 auto" }} />;
 
   return (
-    <div style={{ background: C.bg, color: C.white, fontFamily: "'Cormorant Garamond',serif", minHeight: "100vh", overflowX: "hidden" }}>
+    <div onClick={handleScreenTap} style={{ background: C.bg, color: C.white, fontFamily: "'Cormorant Garamond',serif", minHeight: "100vh", overflowX: "hidden", cursor: "default" }}>
 
       {/* 🎵 CANCIÓN DE FONDO
            Opciones para agregar "Best Day of My Life" de American Authors
@@ -475,6 +487,31 @@ export default function QuinceInvitation() {
         boxShadow: `0 4px 22px rgba(201,168,76,.5)`,
         animation: musicOn ? "pulse 1.8s infinite" : "none",
       }}>{musicOn ? "♪" : "♫"}</button>
+
+      {/* ── Indicador "toca para avanzar" — esquina inferior izquierda ── */}
+      {active < 4 && (
+        <div data-noscroll="true" style={{
+          position: "fixed", bottom: 28, left: 28, zIndex: 998,
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+          opacity: .45, pointerEvents: "none",
+          animation: "fadeUp .6s ease forwards",
+        }}>
+          {/* Flecha animada */}
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%",
+            border: `1px solid ${C.gold}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 13, color: C.gold,
+            animation: "pulse 2.2s infinite",
+          }}>↓</div>
+          <p style={{
+            fontFamily: "'Cinzel',serif", fontSize: 7,
+            letterSpacing: ".2em", color: C.gold,
+            writingMode: "vertical-rl",
+            transform: "rotate(180deg)",
+          }}>TOCA</p>
+        </div>
+      )}
 
       {/* Nav dots */}
       <nav style={{ position: "fixed", right: 14, top: "50%", transform: "translateY(-50%)", zIndex: 999, display: "flex", flexDirection: "column", gap: 10 }}>
