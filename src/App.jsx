@@ -5,10 +5,10 @@ const FAMILY_NAME = getParam("familia") || "Familia Invitada";
 const MAX_GUESTS  = Math.max(1, parseInt(getParam("invitados") || "2"));
 
 // 👇 PEGA AQUÍ la URL de tu Google Apps Script (ver instrucciones abajo)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5PRnXpotij_SyOqIdNx4LWeLjZndW2Rii3fPoTA56ixsO8vRk8Sf2kHW9loBx3YrJ/exec";
+const GOOGLE_SCRIPT_URL = "PEGA_AQUÍ_TU_URL";
 
 const C = {
-  bg: "#07101f", navy: "#0b1528", navyMid: "#10203a", navyLight: "#192e50",
+  bg: "#013a4a", navy: "#015265", navyMid: "#016a82", navyLight: "#0188a4",
   gold: "#c9a84c", goldLight: "#e8c86d", goldPale: "#f5dfa0",
   white: "#f4f0e8", dim: "rgba(244,240,232,0.72)",
 };
@@ -195,7 +195,7 @@ export default function QuinceInvitation() {
     s.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Great+Vibes&family=Cinzel:wght@400;600;700&display=swap');
       *{box-sizing:border-box;margin:0;padding:0;}
-      ::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:#07101f;} ::-webkit-scrollbar-thumb{background:#c9a84c;}
+      ::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:#013a4a;} ::-webkit-scrollbar-thumb{background:#c9a84c;}
       @keyframes sparkle{0%,100%{opacity:0;transform:scale(0) rotate(0deg);}50%{opacity:.8;transform:scale(1) rotate(180deg);}}
       @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
       @keyframes fadeUp{from{opacity:0;transform:translateY(38px);}to{opacity:1;transform:translateY(0);}}
@@ -261,7 +261,7 @@ export default function QuinceInvitation() {
       };
 
       // ── Enviar a Google Sheets via Apps Script ──
-      if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbz5PRnXpotij_SyOqIdNx4LWeLjZndW2Rii3fPoTA56ixsO8vRk8Sf2kHW9loBx3YrJ/exec") {
+      if (GOOGLE_SCRIPT_URL !== "PEGA_AQUÍ_TU_URL") {
         await fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors", // requerido para Apps Script
@@ -383,9 +383,9 @@ export default function QuinceInvitation() {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
@@ -433,14 +433,14 @@ export default function QuinceInvitation() {
                 </div>
                 <p style={{ fontSize: "clamp(14px,2.5vw,17px)", color: C.white, fontWeight: 600, marginBottom: 4 }}>
                   {/* 👇 Cambia por el nombre de tu iglesia */}
-                  Parroquia San José Esposo de la Virgen María
+                  Parroquia San Juan Bautista
                 </p>
                 <p style={{ fontSize: 12, color: C.goldLight, opacity: .7, marginBottom: 14 }}>
                   {/* 👇 Cambia por la dirección de tu iglesia */}
                   Av. Principal #123, Colonia Centro
                 </p>
                 {/* 👇 Reemplaza el href con el link de Google Maps de tu iglesia */}
-                <a href="https://maps.app.goo.gl/wZkcrQfQ6JAtXAgMA" target="_blank" rel="noopener noreferrer" style={{
+                <a href="https://maps.google.com/?q=Parroquia+San+Juan+Bautista+Monterrey" target="_blank" rel="noopener noreferrer" style={{
                   display: "inline-flex", alignItems: "center", gap: 7,
                   background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                   color: "#07101f", fontFamily: "'Cinzel',serif", fontSize: 9,
@@ -474,7 +474,7 @@ export default function QuinceInvitation() {
                   Av. Eventos #456, Colonia Las Flores
                 </p>
                 {/* 👇 Reemplaza el href con el link de Google Maps de tu salón */}
-                <a href="https://maps.app.goo.gl/pcwfpb2KH2Dsy4LY9" target="_blank" rel="noopener noreferrer" style={{
+                <a href="https://maps.google.com/?q=Salon+La+Galeria+Eventos+Monterrey" target="_blank" rel="noopener noreferrer" style={{
                   display: "inline-flex", alignItems: "center", gap: 7,
                   background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                   color: "#07101f", fontFamily: "'Cinzel',serif", fontSize: 9,
