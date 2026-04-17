@@ -186,12 +186,34 @@ export default function QuinceInvitation() {
   const [photos, setPhotos]         = useState(Array(4).fill(null));
   const [musicOn, setMusicOn]       = useState(false);
   const [visible, setVisible]       = useState({});
-  const [txClass, setTxClass]       = useState("");   // clase de transición activa
+  const [txClass, setTxClass]       = useState("");
   const [txColor, setTxColor]       = useState(C.gold);
-  const prevActive                  = useRef(0);
+  const [showMusicHint, setShowMusicHint] = useState(true); // hint "toca para música"
+  const hasStartedRef = useRef(false); // evita que se dispare 2 veces
+  const prevActive    = useRef(0);
   const audioRef  = useRef(null);
   const secRefs   = useRef([]);
   const countdown = useCountdown("2026-06-13T19:30:00");
+
+  // ── Autoplay en el primer toque del usuario (funciona en móvil) ──
+  useEffect(() => {
+    const startAudio = () => {
+      if (hasStartedRef.current || !audioRef.current) return;
+      hasStartedRef.current = true;
+      audioRef.current.play()
+        .then(() => { setMusicOn(true); setShowMusicHint(false); })
+        .catch(() => { setShowMusicHint(false); });
+    };
+    // Escucha cualquier interacción del usuario
+    window.addEventListener("touchstart", startAudio, { once: true });
+    window.addEventListener("click",      startAudio, { once: true });
+    window.addEventListener("scroll",     startAudio, { once: true, passive: true });
+    return () => {
+      window.removeEventListener("touchstart", startAudio);
+      window.removeEventListener("click",      startAudio);
+      window.removeEventListener("scroll",     startAudio);
+    };
+  }, []);
 
   useEffect(() => {
     const s = document.createElement("style");
@@ -394,7 +416,7 @@ export default function QuinceInvitation() {
            Cambia src por la URL directa del MP3
       */}
       <audio ref={audioRef} loop preload="none"
-        src="/cancion.mp3"
+        src="/best-day-of-my-life.mp3"
       />
 
       <Sparkles />
@@ -424,8 +446,35 @@ export default function QuinceInvitation() {
         </div>
       )}
 
+
+      {/* ── Hint "toca para música" — solo aparece al inicio en móvil ── */}
+      {showMusicHint && (
+        <div style={{
+          position: "fixed", bottom: 92, right: 16, zIndex: 1001,
+          background: `rgba(1,58,74,.92)`, border: `1px solid rgba(201,168,76,.4)`,
+          borderRadius: 24, padding: "8px 14px",
+          display: "flex", alignItems: "center", gap: 7,
+          backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+          animation: "fadeUp .6s ease forwards",
+          boxShadow: "0 4px 20px rgba(0,0,0,.3)",
+        }}>
+          <span style={{ fontSize: 16 }}>🎵</span>
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".15em", color: C.gold, whiteSpace: "nowrap" }}>
+            TOCA PARA ESCUCHAR
+          </p>
+        </div>
+      )}
+
       {/* Botón música */}
-      <button onClick={toggleMusic} className="bg" title={musicOn ? "Pausar" : "Música"} style={{ position: "fixed", bottom: 28, right: 28, zIndex: 1000, width: 54, height: 54, borderRadius: "50%", border: "none", background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, fontSize: 22, color: C.navy, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 22px rgba(201,168,76,.5)`, animation: musicOn ? "pulse 1.8s infinite" : "none" }}>{musicOn ? "♪" : "♫"}</button>
+      <button onClick={toggleMusic} className="bg" title={musicOn ? "Pausar música" : "Reproducir música"} style={{
+        position: "fixed", bottom: 28, right: 28, zIndex: 1000,
+        width: 54, height: 54, borderRadius: "50%", border: "none",
+        background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+        fontSize: 22, color: C.navy,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        boxShadow: `0 4px 22px rgba(201,168,76,.5)`,
+        animation: musicOn ? "pulse 1.8s infinite" : "none",
+      }}>{musicOn ? "♪" : "♫"}</button>
 
       {/* Nav dots */}
       <nav style={{ position: "fixed", right: 14, top: "50%", transform: "translateY(-50%)", zIndex: 999, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -486,9 +535,9 @@ export default function QuinceInvitation() {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
