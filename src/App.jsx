@@ -394,7 +394,7 @@ export default function QuinceInvitation() {
            Cambia src por la URL directa del MP3
       */}
       <audio ref={audioRef} loop preload="none"
-        src="/best-day-of-my-life.mp3"
+        src="/cancion.mp3"
       />
 
       <Sparkles />
