@@ -159,6 +159,16 @@ const CornerFloral = ({ size = 160, flip = false, flipY = false }) => (
   </svg>
 );
 
+/* ── Las 4 esquinas florales de una vez ── */
+const Corners = ({ size = 160 }) => (
+  <>
+    <div style={{ position:"absolute", top:0, left:0, pointerEvents:"none" }}><CornerFloral size={size}/></div>
+    <div style={{ position:"absolute", top:0, right:0, pointerEvents:"none" }}><CornerFloral size={size} flip/></div>
+    <div style={{ position:"absolute", bottom:0, left:0, pointerEvents:"none" }}><CornerFloral size={size} flipY/></div>
+    <div style={{ position:"absolute", bottom:0, right:0, pointerEvents:"none" }}><CornerFloral size={size} flip flipY/></div>
+  </>
+);
+
 const Sparkles = () => {
   const pts = useMemo(() => Array.from({ length: 26 }, (_, i) => ({
     id: i, left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
@@ -669,19 +679,7 @@ export default function QuinceInvitation() {
       {/* ═══ S1 PORTADA ═══════════════════════════════════════ */}
       <section {...sec(0, { background: `radial-gradient(ellipse at 50% 38%, ${C.navyLight}, ${C.bg})`, textAlign: "center", gap: 0 })}>
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)` }} />
-        {/* Ornamentos florales en las 4 esquinas */}
-        <div style={{ position:"absolute", top:0, left:0, pointerEvents:"none" }}>
-          <CornerFloral size={160}/>
-        </div>
-        <div style={{ position:"absolute", top:0, right:0, pointerEvents:"none" }}>
-          <CornerFloral size={160} flip/>
-        </div>
-        <div style={{ position:"absolute", bottom:0, left:0, pointerEvents:"none" }}>
-          <CornerFloral size={160} flipY/>
-        </div>
-        <div style={{ position:"absolute", bottom:0, right:0, pointerEvents:"none" }}>
-          <CornerFloral size={160} flip flipY/>
-        </div>
+        <Corners size={160}/>
 
         <div className="fl" style={{ fontSize: 54, color: C.gold, textShadow: `0 0 40px ${C.gold}55`, marginBottom: 6 }}>♛</div>
         <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(11px,2.2vw,14px)", letterSpacing: ".55em", color: C.gold, marginBottom: 2 }}>MIS</p>
@@ -705,10 +703,8 @@ export default function QuinceInvitation() {
 
       {/* ═══ S2 INVITACIÓN ════════════════════════════════════ */}
       <section {...sec(1, { background: `linear-gradient(180deg, ${C.bg}, ${C.navyMid}, ${C.bg})`, textAlign: "center" })}>
-        <div style={{ position:"absolute", top:0, left:0, pointerEvents:"none", opacity:.5 }}><CornerFloral size={110}/></div>
-        <div style={{ position:"absolute", top:0, right:0, pointerEvents:"none", opacity:.5 }}><CornerFloral size={110} flip/></div>
-        <div style={{ position:"absolute", bottom:0, left:0, pointerEvents:"none", opacity:.5 }}><CornerFloral size={110} flipY/></div>
-        <div style={{ position:"absolute", bottom:0, right:0, pointerEvents:"none", opacity:.5 }}><CornerFloral size={110} flip flipY/></div>        <div className={rv(1)} style={{ maxWidth: 560, width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
+        <Corners size={160}/>
+        <div className={rv(1)} style={{ maxWidth: 560, width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
           <div style={{ color: C.gold, fontSize: 26, opacity: .5 }}>✦</div>
           <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold }}>CON LA BENDICIÓN DE DIOS</p>
           <p style={{ fontSize: "clamp(16px,3.2vw,21px)", color: C.dim, lineHeight: 2.1, fontStyle: "italic", fontWeight: 300 }}>
@@ -728,6 +724,7 @@ export default function QuinceInvitation() {
 
       {/* ═══ S3 DETALLES + COUNTDOWN ══════════════════════════ */}
       <section {...sec(2, { background: `radial-gradient(ellipse at 30% 50%, ${C.navyLight}, ${C.bg} 70%)`, gap: 0, paddingTop: 70 })}>
+        <Corners size={160}/>
         <div className={rv(2)} style={{ maxWidth: 680, width: "100%", textAlign: "center" }}>
 
           {/* Encabezado */}
@@ -788,6 +785,7 @@ export default function QuinceInvitation() {
 
       {/* ═══ S4 CUENTA REGRESIVA + UBICACIONES ═══════════════ */}
       <section {...sec(3, { background: `radial-gradient(ellipse at 60% 40%, ${C.navyLight}, ${C.bg} 70%)`, gap: 28 })}>
+        <Corners size={160}/>
         <div className={rv(3)} style={{ maxWidth: 680, width: "100%", textAlign: "center" }}>
 
           <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 8 }}>— FALTAN —</p>
@@ -862,6 +860,7 @@ export default function QuinceInvitation() {
 
       {/* ═══ S5 GALERÍA — Carrusel ════════════════════════════ */}
       <section {...sec(4, { background: `linear-gradient(180deg, ${C.bg}, ${C.navyMid}, ${C.bg})`, gap: 28, padding: "70px 0 60px" })}>
+        <Corners size={160}/>
         <div className={rv(4)} style={{ width: "100%", textAlign: "center" }}>
           <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 8, padding: "0 24px" }}>— GALERÍA —</p>
           <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(48px,11vw,66px)", color: C.goldLight, marginBottom: 28, padding: "0 24px", textShadow: `0 4px 24px rgba(201,168,76,.3)` }}>Mis Momentos</h2>
@@ -872,10 +871,8 @@ export default function QuinceInvitation() {
 
       {/* ═══ S6 RSVP ══════════════════════════════════════════ */}
       <section {...sec(5, { background: `radial-gradient(ellipse at 50% 52%, ${C.navyLight}, ${C.bg})`, gap: 24 })}>
-        <div style={{ position:"absolute", top:0, left:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110}/></div>
-        <div style={{ position:"absolute", top:0, right:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110} flip/></div>
-        <div style={{ position:"absolute", bottom:0, left:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110} flipY/></div>
-        <div style={{ position:"absolute", bottom:0, right:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110} flip flipY/></div>        <div className={rv(5)} style={{ maxWidth: 470, width: "100%", textAlign: "center" }}>
+        <Corners size={160}/>
+        <div className={rv(5)} style={{ maxWidth: 470, width: "100%", textAlign: "center" }}>
           <div className="fl" style={{ fontSize: 38, color: C.gold, marginBottom: 14 }}>✉</div>
           <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 8 }}>— CONFIRMA TU ASISTENCIA —</p>
           <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(44px,10vw,60px)", color: C.goldLight, marginBottom: 30 }}>¿Nos acompañas?</h2>
