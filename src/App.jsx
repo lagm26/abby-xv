@@ -382,8 +382,20 @@ export default function QuinceInvitation() {
   return (
     <div style={{ background: C.bg, color: C.white, fontFamily: "'Cormorant Garamond',serif", minHeight: "100vh", overflowX: "hidden" }}>
 
-      {/* 🎵 Reemplaza el src con el URL de tu canción favorita */}
-      <audio ref={audioRef} loop preload="none" src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" />
+      {/* 🎵 CANCIÓN DE FONDO
+           Opciones para agregar "Best Day of My Life" de American Authors
+           (o cualquier canción de Taylor Swift):
+
+           OPCIÓN A — Sube tu MP3 al proyecto:
+           1. Copia tu archivo .mp3 a la carpeta /public de tu proyecto Vite
+           2. Cambia src por: src="/nombre-de-tu-cancion.mp3"
+
+           OPCIÓN B — Usa un link directo de internet (si tienes uno legal)
+           Cambia src por la URL directa del MP3
+      */}
+      <audio ref={audioRef} loop preload="none"
+        src="/best-day-of-my-life.mp3"
+      />
 
       <Sparkles />
 
@@ -474,9 +486,9 @@ export default function QuinceInvitation() {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
@@ -496,7 +508,7 @@ export default function QuinceInvitation() {
             <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: `linear-gradient(180deg, transparent, ${C.gold}, ${C.gold}, transparent)`, transform: "translateX(-50%)", opacity: .4 }}/>
 
             {[
-              { time: "7:00 PM", icon: "⛪", title: "Ceremonia Religiosa", desc: "Parroquia San Juan Bautista", side: "left" },
+              { time: "4:00 PM", icon: "⛪", title: "Ceremonia Religiosa", desc: "Parroquia de San José Esposo de la Virgen María", side: "left" },
               { time: "7:30 PM", icon: "🌹", title: "Recepción & Fiesta",  desc: "Salón La Galería Eventos",   side: "right" },
             ].map((ev, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: i === 0 ? 24 : 0 }}>
@@ -565,10 +577,9 @@ export default function QuinceInvitation() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14, marginBottom: 24 }}>
             {[
               {
-                icon: "⛪", tag: "CEREMONIA", name: "Parroquia San Juan Bautista",
+                icon: "⛪", tag: "CEREMONIA", name: "Parroquia de San José\nEsposo de la Virgen María",
                 addr: "Av. Principal #123, Colonia Centro",
-                // 👇 Reemplaza con el link real de Google Maps de tu iglesia
-                url: "https://maps.google.com/?q=Parroquia+San+Juan+Bautista+Monterrey",
+                url: "https://maps.google.com/?q=Parroquia+San+Jose+Esposo+Virgen+Maria+Monterrey",
                 color: C.navyLight,
               },
               {
