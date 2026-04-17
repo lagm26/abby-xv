@@ -173,6 +173,169 @@ const Sparkles = () => {
   );
 };
 
+/* ══════════════════════════════════════════════════════════
+   CARRUSEL — swipe en móvil, flechas en desktop, auto-gira
+   👇 Pon aquí las rutas de tus 6 fotos en /public
+══════════════════════════════════════════════════════════ */
+const FOTOS = [
+  "/foto1.jpg",
+  "/foto2.jpg",
+  "/foto3.jpg",
+  "/foto4.jpg",
+  "/foto5.jpg",
+  "/foto6.jpg",
+];
+
+const Carousel = () => {
+  const [cur,  setCur]  = useState(0);
+  const [dir,  setDir]  = useState(1);   // 1=siguiente, -1=anterior
+  const [anim, setAnim] = useState(false);
+  const touchX  = useRef(null);
+  const autoRef = useRef(null);
+  const total   = FOTOS.length;
+
+  const goTo = (next, direction = 1) => {
+    if (anim) return;
+    setDir(direction);
+    setAnim(true);
+    setTimeout(() => {
+      setCur((next + total) % total);
+      setAnim(false);
+    }, 420);
+  };
+
+  const next = () => goTo(cur + 1, 1);
+  const prev = () => goTo(cur - 1, -1);
+
+  // Auto-rotate cada 4 s
+  useEffect(() => {
+    autoRef.current = setInterval(next, 4000);
+    return () => clearInterval(autoRef.current);
+  }, [cur]);
+
+  // Swipe táctil
+  const onTouchStart = e => { touchX.current = e.touches[0].clientX; };
+  const onTouchEnd   = e => {
+    if (touchX.current === null) return;
+    const diff = touchX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) { diff > 0 ? next() : prev(); }
+    touchX.current = null;
+  };
+
+  const slide = (idx) => {
+    const isActive = idx === cur;
+    const entering = anim && idx === (cur + dir * 1 + total) % total;
+    const leaving  = anim && idx === cur;
+    return {
+      position:  idx === cur || (anim && idx === (cur - dir + total) % total) ? "absolute" : "absolute",
+      inset: 0,
+      opacity:   isActive ? (anim ? 0 : 1) : (entering ? (anim ? 1 : 0) : 0),
+      transform: isActive
+        ? `translateX(${anim ? dir * -6 + "%" : "0"})` 
+        : `translateX(${anim && entering ? "0" : dir * 6 + "%"})`,
+      transition: "opacity .42s ease, transform .42s cubic-bezier(.4,0,.2,1)",
+      zIndex: isActive ? 2 : 1,
+    };
+  };
+
+  return (
+    <div data-noscroll="true" style={{ width: "100%", userSelect: "none" }}>
+
+      {/* Marco del carrusel */}
+      <div
+        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
+        style={{ position: "relative", width: "100%", maxWidth: 420, margin: "0 auto",
+          aspectRatio: "3/4", borderRadius: 20, overflow: "hidden",
+          boxShadow: `0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(201,168,76,.3)`,
+          background: C.navy, cursor: "grab",
+        }}>
+
+        {/* Fotos */}
+        {FOTOS.map((src, idx) => (
+          <div key={idx} style={{ ...slide(idx), position: "absolute", inset: 0 }}>
+            <img src={src} alt={`Foto ${idx + 1}`}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              onError={e => { e.target.style.display = "none"; }}
+            />
+            {/* Overlay degradado inferior */}
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "35%",
+              background: "linear-gradient(transparent, rgba(1,40,58,.85))" }}/>
+          </div>
+        ))}
+
+        {/* Contador */}
+        <div style={{ position: "absolute", top: 14, right: 16, zIndex: 10,
+          background: "rgba(0,0,0,.45)", backdropFilter: "blur(6px)",
+          borderRadius: 20, padding: "4px 12px", border: `1px solid rgba(201,168,76,.3)` }}>
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, color: C.gold, letterSpacing: ".12em" }}>
+            {cur + 1} / {total}
+          </p>
+        </div>
+
+        {/* Etiqueta foto */}
+        <div style={{ position: "absolute", bottom: 18, left: 0, right: 0, zIndex: 10, textAlign: "center" }}>
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".3em", color: C.goldPale, opacity: .8 }}>
+            FOTO {cur + 1}
+          </p>
+        </div>
+
+        {/* Flecha izquierda */}
+        <button onClick={prev} data-noscroll="true" style={{
+          position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", zIndex: 10,
+          width: 38, height: 38, borderRadius: "50%", border: `1px solid rgba(201,168,76,.5)`,
+          background: "rgba(0,0,0,.4)", backdropFilter: "blur(6px)",
+          color: C.gold, fontSize: 18, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all .2s",
+        }}>‹</button>
+
+        {/* Flecha derecha */}
+        <button onClick={next} data-noscroll="true" style={{
+          position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", zIndex: 10,
+          width: 38, height: 38, borderRadius: "50%", border: `1px solid rgba(201,168,76,.5)`,
+          background: "rgba(0,0,0,.4)", backdropFilter: "blur(6px)",
+          color: C.gold, fontSize: 18, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all .2s",
+        }}>›</button>
+      </div>
+
+      {/* Puntos de navegación */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 18 }}>
+        {FOTOS.map((_, idx) => (
+          <button key={idx} onClick={() => goTo(idx, idx > cur ? 1 : -1)} data-noscroll="true"
+            style={{
+              width: idx === cur ? 24 : 8, height: 8,
+              borderRadius: 4, border: "none", cursor: "pointer",
+              background: idx === cur ? C.gold : `rgba(201,168,76,.3)`,
+              transition: "all .35s ease", padding: 0,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Miniaturas */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 14, padding: "0 24px", overflowX: "auto" }}>
+        {FOTOS.map((src, idx) => (
+          <button key={idx} onClick={() => goTo(idx, idx > cur ? 1 : -1)} data-noscroll="true"
+            style={{
+              width: 48, height: 64, flexShrink: 0, borderRadius: 8, overflow: "hidden",
+              border: `2px solid ${idx === cur ? C.gold : "rgba(201,168,76,.2)"}`,
+              cursor: "pointer", padding: 0, transition: "all .3s",
+              opacity: idx === cur ? 1 : .55,
+              transform: idx === cur ? "scale(1.08)" : "scale(1)",
+            }}>
+            <img src={src} alt={`Foto ${idx + 1}`}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              onError={e => { e.target.parentElement.style.background = C.navy; e.target.style.display = "none"; }}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function QuinceInvitation() {
   const [active, setActive]         = useState(0);
   const [attending, setAttending]   = useState(null);
@@ -183,7 +346,7 @@ export default function QuinceInvitation() {
   const [allRsvps, setAllRsvps]     = useState([]);
   const [showAdmin, setShowAdmin]   = useState(false);
   const [adminTaps, setAdminTaps]   = useState(0);
-  const [photos, setPhotos]         = useState(Array(4).fill(null));
+  const [photos, setPhotos]         = useState(Array(6).fill(null));
   const [musicOn, setMusicOn]       = useState(false);
   const [visible, setVisible]       = useState({});
   const [txClass, setTxClass]       = useState("");
@@ -397,7 +560,7 @@ export default function QuinceInvitation() {
     if (interactive.includes(tag)) return;
     if (e.target.closest("button,input,label,a,select,textarea,[data-noscroll]")) return;
     // Avanzar a la siguiente sección (si no es la última, regresa a inicio)
-    const next = active < 4 ? active + 1 : 0;
+    const next = active < 5 ? active + 1 : 0;
     scrollTo(next);
   };
   const footerTap = () => setAdminTaps(t => { if (t + 1 >= 5) { setShowAdmin(true); loadRsvps(); return 0; } return t + 1; });
@@ -489,33 +652,16 @@ export default function QuinceInvitation() {
       }}>{musicOn ? "♪" : "♫"}</button>
 
       {/* ── Indicador "toca para avanzar" — esquina inferior izquierda ── */}
-      {active < 4 && (
-        <div data-noscroll="true" style={{
-          position: "fixed", bottom: 28, left: 28, zIndex: 998,
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-          opacity: .45, pointerEvents: "none",
-          animation: "fadeUp .6s ease forwards",
-        }}>
-          {/* Flecha animada */}
-          <div style={{
-            width: 28, height: 28, borderRadius: "50%",
-            border: `1px solid ${C.gold}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 13, color: C.gold,
-            animation: "pulse 2.2s infinite",
-          }}>↓</div>
-          <p style={{
-            fontFamily: "'Cinzel',serif", fontSize: 7,
-            letterSpacing: ".2em", color: C.gold,
-            writingMode: "vertical-rl",
-            transform: "rotate(180deg)",
-          }}>TOCA</p>
+      {active < 5 && (
+        <div data-noscroll="true" style={{ position: "fixed", bottom: 28, left: 28, zIndex: 998, display: "flex", flexDirection: "column", alignItems: "center", gap: 5, opacity: .45, pointerEvents: "none", animation: "fadeUp .6s ease forwards" }}>
+          <div style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${C.gold}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: C.gold, animation: "pulse 2.2s infinite" }}>↓</div>
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7, letterSpacing: ".2em", color: C.gold, writingMode: "vertical-rl", transform: "rotate(180deg)" }}>TOCA</p>
         </div>
       )}
 
       {/* Nav dots */}
       <nav style={{ position: "fixed", right: 14, top: "50%", transform: "translateY(-50%)", zIndex: 999, display: "flex", flexDirection: "column", gap: 10 }}>
-        {["Inicio", "Invitación", "Detalles", "Galería", "Confirmar"].map((lbl, i) => (
+        {["Inicio","Invitación","Detalles","Ubicación","Galería","Confirmar"].map((lbl, i) => (
           <button key={i} onClick={() => scrollTo(i)} title={lbl} style={{ width: 10, height: 10, borderRadius: "50%", border: `2px solid ${C.gold}`, background: active === i ? C.gold : "transparent", cursor: "pointer", padding: 0, transition: "all .3s", transform: active === i ? "scale(1.4)" : "scale(1)" }} />
         ))}
       </nav>
@@ -621,7 +767,7 @@ export default function QuinceInvitation() {
           </div>
 
           {/* ── Info extra: fecha y vestimenta ── */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 14, marginBottom: 28, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 14, marginBottom: 20, flexWrap: "wrap" }}>
             {[
               { icon: "📅", label: "FECHA", val: "13 de Junio 2026" },
               { icon: "👗", label: "VESTIMENTA", val: "Formal Elegante" },
@@ -636,63 +782,72 @@ export default function QuinceInvitation() {
             ))}
           </div>
 
-          {/* ── Countdown ── */}
-          <div style={{ border: `1px solid rgba(201,168,76,.3)`, borderRadius: 18, padding: "22px 16px 26px", background: `linear-gradient(135deg, rgba(201,168,76,.06), rgba(1,136,164,.08))`, marginBottom: 28, position: "relative", overflow: "hidden" }}>
-            {/* Brillo de fondo */}
-            <div style={{ position: "absolute", top: -30, left: "50%", transform: "translateX(-50%)", width: 200, height: 60, background: `radial-gradient(ellipse, rgba(201,168,76,.15), transparent)`, pointerEvents: "none" }}/>
-            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".35em", color: C.gold, marginBottom: 20 }}>✦ CUENTA REGRESIVA ✦</p>
-            <div style={{ display: "flex", justifyContent: "center", gap: "clamp(8px,3vw,28px)" }}>
-              {[["DÍAS","d"],["HORAS","h"],["MIN","m"],["SEG","s"]].map(([lbl,k], i) => (
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".28em", color: C.gold, opacity: .7 }}>✦ TU PRESENCIA ES EL MEJOR REGALO ✦</p>
+        </div>
+      </section>
+
+      {/* ═══ S4 CUENTA REGRESIVA + UBICACIONES ═══════════════ */}
+      <section {...sec(3, { background: `radial-gradient(ellipse at 60% 40%, ${C.navyLight}, ${C.bg} 70%)`, gap: 28 })}>
+        <div className={rv(3)} style={{ maxWidth: 680, width: "100%", textAlign: "center" }}>
+
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 8 }}>— FALTAN —</p>
+          <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(44px,10vw,62px)", color: C.goldLight, marginBottom: 28, textShadow: `0 4px 24px rgba(201,168,76,.3)` }}>¡Ya casi es el gran día!</h2>
+
+          {/* ── Countdown grande ── */}
+          <div style={{ border: `1px solid rgba(201,168,76,.35)`, borderRadius: 20, padding: "28px 20px 32px", background: `linear-gradient(135deg, rgba(201,168,76,.07), rgba(1,136,164,.1))`, marginBottom: 36, position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: -40, left: "50%", transform: "translateX(-50%)", width: 260, height: 80, background: `radial-gradient(ellipse, rgba(201,168,76,.18), transparent)`, pointerEvents: "none" }}/>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".35em", color: C.gold, marginBottom: 24 }}>✦ CUENTA REGRESIVA ✦</p>
+            <div style={{ display: "flex", justifyContent: "center", gap: "clamp(10px,3vw,24px)" }}>
+              {[["DÍAS","d"],["HORAS","h"],["MIN","m"],["SEG","s"]].map(([lbl,k]) => (
                 <div key={k} style={{ textAlign: "center" }}>
-                  {/* Caja del número */}
-                  <div style={{ background: `linear-gradient(180deg, ${C.navyLight}, ${C.navy})`, border: `1px solid rgba(201,168,76,.35)`, borderRadius: 10, padding: "10px 14px", minWidth: "clamp(52px,12vw,68px)", marginBottom: 8, boxShadow: `0 4px 16px rgba(0,0,0,.3), inset 0 1px 0 rgba(201,168,76,.1)`, position: "relative", overflow: "hidden" }}>
-                    {/* Línea de brillo */}
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, rgba(201,168,76,.4), transparent)` }}/>
-                    <p className="gt" style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(28px,7vw,44px)", fontWeight: 700, lineHeight: 1 }}>
+                  <div style={{ background: `linear-gradient(180deg, ${C.navyLight}, ${C.navy})`, border: `1px solid rgba(201,168,76,.4)`, borderRadius: 14, padding: "14px 16px", minWidth: "clamp(60px,14vw,80px)", marginBottom: 10, boxShadow: `0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(201,168,76,.15)`, position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, rgba(201,168,76,.5), transparent)` }}/>
+                    <p className="gt" style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(32px,8vw,52px)", fontWeight: 700, lineHeight: 1 }}>
                       {String(countdown[k] ?? 0).padStart(2, "0")}
                     </p>
                   </div>
-                  <p style={{ fontSize: "clamp(7px,1.4vw,9px)", letterSpacing: ".22em", color: C.gold, opacity: .7, fontFamily: "'Cinzel',serif" }}>{lbl}</p>
+                  <p style={{ fontSize: "clamp(7px,1.4vw,10px)", letterSpacing: ".25em", color: C.gold, opacity: .75, fontFamily: "'Cinzel',serif" }}>{lbl}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ── Ubicaciones rediseñadas ── */}
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 16 }}>— CÓMO LLEGAR —</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14, marginBottom: 24 }}>
+          {/* ── Ubicaciones ── */}
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 18 }}>— CÓMO LLEGAR —</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14 }}>
             {[
               {
-                icon: "⛪", tag: "CEREMONIA", name: "Parroquia de San José\nEsposo de la Virgen María",
+                icon: "⛪", tag: "CEREMONIA · 4:00 PM",
+                name: "Parroquia de San José\nEsposo de la Virgen María",
                 addr: "Av. Principal #123, Colonia Centro",
+                // 👇 Cambia este link por el de tu iglesia en Google Maps
                 url: "https://maps.google.com/?q=Parroquia+San+Jose+Esposo+Virgen+Maria+Monterrey",
                 color: C.navyLight,
               },
               {
-                icon: "🌹", tag: "RECEPCIÓN", name: "Salón La Galería Eventos",
+                icon: "🌹", tag: "RECEPCIÓN · 7:30 PM",
+                name: "Salón La Galería Eventos",
                 addr: "Av. Eventos #456, Colonia Las Flores",
-                // 👇 Reemplaza con el link real de Google Maps de tu salón
+                // 👇 Cambia este link por el de tu salón en Google Maps
                 url: "https://maps.google.com/?q=Salon+La+Galeria+Eventos+Monterrey",
                 color: C.navyMid,
               },
             ].map((loc, i) => (
               <div key={i} className="hov" style={{ borderRadius: 16, overflow: "hidden", border: `1px solid rgba(201,168,76,.28)`, boxShadow: "0 8px 32px rgba(0,0,0,.35)", background: `linear-gradient(160deg, ${loc.color}88, ${C.bg})` }}>
-                {/* Header decorativo */}
                 <div style={{ padding: "18px 20px 14px", borderBottom: `1px solid rgba(201,168,76,.15)`, display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: `rgba(201,168,76,.12)`, border: `1px solid rgba(201,168,76,.35)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{loc.icon}</div>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: `rgba(201,168,76,.12)`, border: `1px solid rgba(201,168,76,.35)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>{loc.icon}</div>
                   <div style={{ textAlign: "left" }}>
-                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".25em", color: C.gold, marginBottom: 3 }}>{loc.tag}</p>
-                    <p style={{ fontSize: "clamp(13px,2.5vw,16px)", color: C.white, fontWeight: 600, lineHeight: 1.3 }}>{loc.name}</p>
+                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7, letterSpacing: ".22em", color: C.gold, marginBottom: 4 }}>{loc.tag}</p>
+                    <p style={{ fontSize: "clamp(13px,2.5vw,15px)", color: C.white, fontWeight: 600, lineHeight: 1.35, whiteSpace: "pre-line" }}>{loc.name}</p>
                   </div>
                 </div>
-                {/* Body */}
                 <div style={{ padding: "14px 20px 18px" }}>
                   <p style={{ fontSize: 12, color: C.goldLight, opacity: .7, marginBottom: 14, textAlign: "left", lineHeight: 1.6 }}>📍 {loc.addr}</p>
                   <a href={loc.url} target="_blank" rel="noopener noreferrer" className="loc-btn"
                     style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%",
                       background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                       color: "#012030", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".2em",
-                      fontWeight: 700, padding: "11px 0", borderRadius: 8, textDecoration: "none",
+                      fontWeight: 700, padding: "12px 0", borderRadius: 8, textDecoration: "none",
                       boxShadow: `0 4px 16px rgba(201,168,76,.3)`, transition: "all .3s",
                   }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#012030" strokeWidth="2.5" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -702,40 +857,25 @@ export default function QuinceInvitation() {
               </div>
             ))}
           </div>
-
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".28em", color: C.gold, opacity: .7 }}>✦ TU PRESENCIA ES EL MEJOR REGALO ✦</p>
         </div>
       </section>
 
-      {/* ═══ S4 GALERÍA ═══════════════════════════════════════ */}
-      <section {...sec(3, { background: `linear-gradient(180deg, ${C.bg}, ${C.navyMid}, ${C.bg})`, gap: 32 })}>
-        <div className={rv(3)} style={{ maxWidth: 680, width: "100%", textAlign: "center" }}>
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 10 }}>— GALERÍA —</p>
-          <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(48px,11vw,66px)", color: C.goldLight, marginBottom: 6 }}>Mis Momentos</h2>
-          <p style={{ fontSize: 13, color: C.gold, opacity: .5, fontStyle: "italic", marginBottom: 26 }}>Toca cada cuadro para agregar tus fotos</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 11 }}>
-            {photos.map((photo, idx) => (
-              <label key={idx} className="sl" style={{ gridRow: idx === 0 ? "span 2" : "span 1", aspectRatio: idx === 0 ? "3/4.5" : "4/3", cursor: "pointer", borderRadius: 12, overflow: "hidden", border: `2px dashed rgba(201,168,76,.32)`, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(201,168,76,.03)" }}>
-                {photo
-                  ? <img src={photo} alt={`Foto ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <div style={{ textAlign: "center", padding: 16 }}>
-                    <div style={{ fontSize: 34, marginBottom: 8, color: C.gold, opacity: .38 }}>📷</div>
-                    <p style={{ fontSize: 8, color: C.gold, opacity: .45, fontFamily: "'Cinzel',serif", letterSpacing: ".15em" }}>AGREGAR FOTO</p>
-                  </div>
-                }
-                <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => handlePhoto(idx, e)} />
-              </label>
-            ))}
-          </div>
+      {/* ═══ S5 GALERÍA — Carrusel ════════════════════════════ */}
+      <section {...sec(4, { background: `linear-gradient(180deg, ${C.bg}, ${C.navyMid}, ${C.bg})`, gap: 28, padding: "70px 0 60px" })}>
+        <div className={rv(4)} style={{ width: "100%", textAlign: "center" }}>
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 8, padding: "0 24px" }}>— GALERÍA —</p>
+          <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(48px,11vw,66px)", color: C.goldLight, marginBottom: 28, padding: "0 24px", textShadow: `0 4px 24px rgba(201,168,76,.3)` }}>Mis Momentos</h2>
+
+          <Carousel />
         </div>
       </section>
 
-      {/* ═══ S5 RSVP ══════════════════════════════════════════ */}
-      <section {...sec(4, { background: `radial-gradient(ellipse at 50% 52%, ${C.navyLight}, ${C.bg})`, gap: 24 })}>
+      {/* ═══ S6 RSVP ══════════════════════════════════════════ */}
+      <section {...sec(5, { background: `radial-gradient(ellipse at 50% 52%, ${C.navyLight}, ${C.bg})`, gap: 24 })}>
         <div style={{ position:"absolute", top:0, left:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110}/></div>
         <div style={{ position:"absolute", top:0, right:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110} flip/></div>
         <div style={{ position:"absolute", bottom:0, left:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110} flipY/></div>
-        <div style={{ position:"absolute", bottom:0, right:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110} flip flipY/></div>        <div className={rv(4)} style={{ maxWidth: 470, width: "100%", textAlign: "center" }}>
+        <div style={{ position:"absolute", bottom:0, right:0, pointerEvents:"none", opacity:.45 }}><CornerFloral size={110} flip flipY/></div>        <div className={rv(5)} style={{ maxWidth: 470, width: "100%", textAlign: "center" }}>
           <div className="fl" style={{ fontSize: 38, color: C.gold, marginBottom: 14 }}>✉</div>
           <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 8 }}>— CONFIRMA TU ASISTENCIA —</p>
           <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(44px,10vw,60px)", color: C.goldLight, marginBottom: 30 }}>¿Nos acompañas?</h2>
