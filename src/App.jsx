@@ -186,6 +186,9 @@ export default function QuinceInvitation() {
   const [photos, setPhotos]         = useState(Array(4).fill(null));
   const [musicOn, setMusicOn]       = useState(false);
   const [visible, setVisible]       = useState({});
+  const [txClass, setTxClass]       = useState("");   // clase de transición activa
+  const [txColor, setTxColor]       = useState(C.gold);
+  const prevActive                  = useRef(0);
   const audioRef  = useRef(null);
   const secRefs   = useRef([]);
   const countdown = useCountdown("2026-06-13T19:30:00");
@@ -202,6 +205,34 @@ export default function QuinceInvitation() {
       @keyframes shimmer{0%{background-position:200% center;}100%{background-position:-200% center;}}
       @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.55);}65%{box-shadow:0 0 0 12px rgba(201,168,76,0);}}
       @keyframes glow{0%,100%{border-color:rgba(201,168,76,.25);}50%{border-color:rgba(201,168,76,.7);}}
+      @keyframes flipIn{from{transform:rotateX(90deg);opacity:0;}to{transform:rotateX(0deg);opacity:1;}}
+      @keyframes lineGrow{from{width:0;}to{width:100%;}}
+      @keyframes iconPop{0%{transform:scale(0) rotate(-20deg);opacity:0;}70%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0deg);opacity:1;}}
+
+      /* ── Transiciones entre secciones ── */
+      @keyframes curtainDown{0%{clip-path:inset(0 0 100% 0);}100%{clip-path:inset(0 0 0% 0);}}
+      @keyframes curtainUp{0%{clip-path:inset(0 0 0 0);opacity:1;}100%{clip-path:inset(100% 0 0 0);opacity:0;}}
+      @keyframes diamondIn{0%{clip-path:polygon(50% 50%,50% 50%,50% 50%,50% 50%);}100%{clip-path:polygon(50% -100%,200% 50%,50% 200%,-100% 50%);}}
+      @keyframes diamondOut{0%{clip-path:polygon(50% -100%,200% 50%,50% 200%,-100% 50%);opacity:1;}100%{clip-path:polygon(50% 50%,50% 50%,50% 50%,50% 50%);opacity:0;}}
+      @keyframes irisIn{0%{clip-path:circle(0% at 50% 50%);}100%{clip-path:circle(150% at 50% 50%);}}
+      @keyframes irisOut{0%{clip-path:circle(150% at 50% 50%);opacity:1;}100%{clip-path:circle(0% at 50% 50%);opacity:0;}}
+      @keyframes blindsIn{
+        0%{clip-path:inset(0 100% 0 0);}
+        100%{clip-path:inset(0 0% 0 0);}
+      }
+      @keyframes rippleIn{
+        0%{transform:scale(0);opacity:1;border-radius:50%;}
+        100%{transform:scale(40);opacity:0;border-radius:50%;}
+      }
+
+      .tx-overlay{position:fixed;inset:0;z-index:5000;pointer-events:none;}
+      .tx-diamond-in{animation:diamondIn .55s cubic-bezier(.77,0,.18,1) forwards;}
+      .tx-diamond-out{animation:diamondOut .45s cubic-bezier(.77,0,.18,1) .55s forwards;}
+      .tx-iris-in{animation:irisIn .5s cubic-bezier(.77,0,.18,1) forwards;}
+      .tx-iris-out{animation:irisOut .4s cubic-bezier(.77,0,.18,1) .5s forwards;}
+      .tx-curtain-in{animation:curtainDown .5s cubic-bezier(.77,0,.18,1) forwards;}
+      .tx-curtain-out{animation:curtainUp .4s cubic-bezier(.77,0,.18,1) .5s forwards;}
+
       .gt{background:linear-gradient(90deg,#c9a84c,#f5dfa0,#e8c86d,#f5dfa0,#c9a84c);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;}
       .fu{animation:fadeUp .85s cubic-bezier(.16,1,.3,1) forwards;}
       .fl{animation:float 3.5s ease-in-out infinite;}
@@ -209,20 +240,41 @@ export default function QuinceInvitation() {
       .bg{transition:all .3s;cursor:pointer;} .bg:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,168,76,.45)!important;}
       .gh:hover{background:rgba(201,168,76,.1)!important;border-color:#c9a84c!important;}
       .sl{transition:all .3s;animation:glow 3s ease-in-out infinite;} .sl:hover{transform:scale(1.025);border-color:#c9a84c!important;}
+      .loc-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.4)!important;filter:brightness(1.1);}
       button:active{transform:scale(.97)!important;} input{outline:none!important;}
       input:focus{border-color:#c9a84c!important;box-shadow:0 0 0 2px rgba(201,168,76,.15)!important;}
+      .flip-num{animation:flipIn .4s ease forwards;display:inline-block;perspective:300px;}
+      .icon-pop{animation:iconPop .6s cubic-bezier(.34,1.56,.64,1) forwards;}
+      .line-grow::after{content:'';position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);animation:lineGrow 1.2s ease forwards;}
     `;
     document.head.appendChild(s);
     return () => document.head.removeChild(s);
   }, []);
 
+  // Transiciones únicas por sección: 0→diamante, 1→iris, 2→cortina, 3→iris, 4→diamante
+  const TX = ["tx-diamond","tx-iris","tx-curtain","tx-iris","tx-diamond"];
+  const TX_COLORS = [C.gold, C.navyLight, C.goldLight, C.navyLight, C.gold];
+
+  const fireTransition = (idx) => {
+    const type = TX[idx] || "tx-diamond";
+    const col  = TX_COLORS[idx] || C.gold;
+    setTxColor(col);
+    setTxClass(`${type}-in`);
+    setTimeout(() => setTxClass(`${type}-out`), 550);
+    setTimeout(() => setTxClass(""), 1000);
+  };
+
   useEffect(() => {
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         const i = parseInt(e.target.dataset.i || "0");
-        if (e.isIntersecting) { setActive(i); setVisible(v => ({ ...v, [i]: true })); }
+        if (e.isIntersecting) {
+          if (prevActive.current !== i) { fireTransition(i); prevActive.current = i; }
+          setActive(i);
+          setVisible(v => ({ ...v, [i]: true }));
+        }
       });
-    }, { threshold: 0.35 });
+    }, { threshold: 0.45 });
     secRefs.current.forEach(r => r && obs.observe(r));
     return () => obs.disconnect();
   }, []);
@@ -321,6 +373,17 @@ export default function QuinceInvitation() {
 
       <Sparkles />
 
+      {/* ── Overlay de transición entre secciones ── */}
+      {txClass && (
+        <div className={`tx-overlay ${txClass}`}
+          style={{ background: txColor === C.gold
+            ? `radial-gradient(circle at 50% 50%, ${C.goldPale}, ${C.gold})`
+            : `radial-gradient(circle at 50% 50%, ${C.navyLight}, ${C.navy})`,
+            opacity: .92
+          }}
+        />
+      )}
+
       {/* Botón música */}
       <button onClick={toggleMusic} className="bg" title={musicOn ? "Pausar" : "Música"} style={{ position: "fixed", bottom: 28, right: 28, zIndex: 1000, width: 54, height: 54, borderRadius: "50%", border: "none", background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, fontSize: 22, color: C.navy, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 22px rgba(201,168,76,.5)`, animation: musicOn ? "pulse 1.8s infinite" : "none" }}>{musicOn ? "♪" : "♫"}</button>
 
@@ -392,119 +455,130 @@ export default function QuinceInvitation() {
       </section>
 
       {/* ═══ S3 DETALLES + COUNTDOWN ══════════════════════════ */}
-      <section {...sec(2, { background: `radial-gradient(ellipse at 50% 58%, ${C.navyLight}, ${C.bg})`, gap: 32 })}>
+      <section {...sec(2, { background: `radial-gradient(ellipse at 30% 50%, ${C.navyLight}, ${C.bg} 70%)`, gap: 0, paddingTop: 70 })}>
         <div className={rv(2)} style={{ maxWidth: 680, width: "100%", textAlign: "center" }}>
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 10 }}>— DETALLES DEL EVENTO —</p>
-          <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(48px,11vw,68px)", color: C.goldLight, marginBottom: 36 }}>Una noche inolvidable</h2>
 
-          {/* Info rápida: fecha, hora, vestimenta */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(148px,1fr))", gap: 13, marginBottom: 28 }}>
+          {/* Encabezado */}
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 8 }}>— DETALLES DEL EVENTO —</p>
+          <h2 style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(48px,11vw,68px)", color: C.goldLight, marginBottom: 32, textShadow: `0 4px 24px rgba(201,168,76,.3)` }}>Una noche inolvidable</h2>
+
+          {/* ── Timeline del programa ── */}
+          <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 0, marginBottom: 32 }}>
+            {/* Línea vertical */}
+            <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: `linear-gradient(180deg, transparent, ${C.gold}, ${C.gold}, transparent)`, transform: "translateX(-50%)", opacity: .4 }}/>
+
             {[
-              { icon: "📅", label: "FECHA",      val: "13 de Junio",  sub: "2026" },
-              { icon: "🕖", label: "HORA",       val: "7:30 PM",      sub: "En punto" },
-              { icon: "👗", label: "VESTIMENTA", val: "Formal",       sub: "Elegante" },
-            ].map((d, i) => (
-              <div key={i} className="hov" style={{ background: `linear-gradient(135deg,rgba(255,255,255,.04),rgba(201,168,76,.04))`, border: `1px solid rgba(201,168,76,.24)`, borderRadius: 12, padding: "22px 12px", textAlign: "center", cursor: "default", boxShadow: "0 5px 22px rgba(0,0,0,.28)" }}>
-                <div style={{ fontSize: 28, marginBottom: 10 }}>{d.icon}</div>
-                <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".22em", color: C.gold, marginBottom: 6 }}>{d.label}</p>
-                <p style={{ fontSize: "clamp(14px,2.5vw,18px)", color: C.white, fontWeight: 600, marginBottom: 3 }}>{d.val}</p>
-                <p style={{ fontSize: 12, color: C.goldLight, opacity: .75 }}>{d.sub}</p>
+              { time: "7:00 PM", icon: "⛪", title: "Ceremonia Religiosa", desc: "Parroquia San Juan Bautista", side: "left" },
+              { time: "7:30 PM", icon: "🌹", title: "Recepción & Fiesta",  desc: "Salón La Galería Eventos",   side: "right" },
+            ].map((ev, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: i === 0 ? 24 : 0 }}>
+                {/* Lado izquierdo */}
+                <div style={{ flex: 1, textAlign: "right", padding: "0 20px 0 0", opacity: ev.side === "left" ? 1 : .35 }}>
+                  {ev.side === "left" && <>
+                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(18px,4vw,24px)", color: C.gold, fontWeight: 700 }}>{ev.time}</p>
+                    <p style={{ fontSize: "clamp(13px,2.5vw,16px)", color: C.white, fontWeight: 600, marginTop: 2 }}>{ev.title}</p>
+                    <p style={{ fontSize: 11, color: C.goldLight, opacity: .65, marginTop: 2 }}>{ev.desc}</p>
+                  </>}
+                </div>
+                {/* Nodo central */}
+                <div style={{ width: 48, height: 48, borderRadius: "50%", border: `2px solid ${C.gold}`, background: `linear-gradient(135deg, ${C.navy}, ${C.navyLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0, boxShadow: `0 0 20px rgba(201,168,76,.35)`, zIndex: 1 }}>{ev.icon}</div>
+                {/* Lado derecho */}
+                <div style={{ flex: 1, textAlign: "left", padding: "0 0 0 20px", opacity: ev.side === "right" ? 1 : .35 }}>
+                  {ev.side === "right" && <>
+                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(18px,4vw,24px)", color: C.gold, fontWeight: 700 }}>{ev.time}</p>
+                    <p style={{ fontSize: "clamp(13px,2.5vw,16px)", color: C.white, fontWeight: 600, marginTop: 2 }}>{ev.title}</p>
+                    <p style={{ fontSize: 11, color: C.goldLight, opacity: .65, marginTop: 2 }}>{ev.desc}</p>
+                  </>}
+                </div>
               </div>
             ))}
           </div>
 
-          {/* ── Ubicaciones con Google Maps ── */}
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 16 }}>— UBICACIONES —</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 16, marginBottom: 28 }}>
-
-            {/* IGLESIA */}
-            <div className="hov" style={{ background: `linear-gradient(135deg,rgba(255,255,255,.04),rgba(201,168,76,.04))`, border: `1px solid rgba(201,168,76,.28)`, borderRadius: 14, overflow: "hidden", boxShadow: "0 6px 28px rgba(0,0,0,.35)" }}>
-              {/* Mini mapa embebido — reemplaza el src con el iframe de tu iglesia */}
-              <iframe
-                title="Iglesia"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3594!2d-100.3161!3d25.6866!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDQxJzExLjgiTiAxMDDCsDE4JzU4LjAiVw!5e0!3m2!1ses!2smx!4v1234567890"
-                width="100%" height="160" style={{ border: 0, display: "block", filter: "invert(.9) hue-rotate(180deg) saturate(0.6)" }}
-                allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-              />
-              <div style={{ padding: "18px 20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 20 }}>⛪</span>
-                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".22em", color: C.gold }}>CEREMONIA RELIGIOSA</p>
+          {/* ── Info extra: fecha y vestimenta ── */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 14, marginBottom: 28, flexWrap: "wrap" }}>
+            {[
+              { icon: "📅", label: "FECHA", val: "13 de Junio 2026" },
+              { icon: "👗", label: "VESTIMENTA", val: "Formal Elegante" },
+            ].map((d, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, background: `rgba(201,168,76,.07)`, border: `1px solid rgba(201,168,76,.25)`, borderRadius: 40, padding: "10px 22px" }}>
+                <span style={{ fontSize: 18 }}>{d.icon}</span>
+                <div style={{ textAlign: "left" }}>
+                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7, letterSpacing: ".22em", color: C.gold, marginBottom: 2 }}>{d.label}</p>
+                  <p style={{ fontSize: "clamp(13px,2.5vw,15px)", color: C.white }}>{d.val}</p>
                 </div>
-                <p style={{ fontSize: "clamp(14px,2.5vw,17px)", color: C.white, fontWeight: 600, marginBottom: 4 }}>
-                  {/* 👇 Cambia por el nombre de tu iglesia */}
-                  Parroquia San Juan Bautista
-                </p>
-                <p style={{ fontSize: 12, color: C.goldLight, opacity: .7, marginBottom: 14 }}>
-                  {/* 👇 Cambia por la dirección de tu iglesia */}
-                  Av. Principal #123, Colonia Centro
-                </p>
-                {/* 👇 Reemplaza el href con el link de Google Maps de tu iglesia */}
-                <a href="https://maps.google.com/?q=Parroquia+San+Juan+Bautista+Monterrey" target="_blank" rel="noopener noreferrer" style={{
-                  display: "inline-flex", alignItems: "center", gap: 7,
-                  background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
-                  color: "#07101f", fontFamily: "'Cinzel',serif", fontSize: 9,
-                  letterSpacing: ".18em", fontWeight: 700, padding: "9px 18px",
-                  borderRadius: 6, textDecoration: "none", transition: "all .3s",
-                }}>
-                  📍 VER EN GOOGLE MAPS
-                </a>
               </div>
-            </div>
-
-            {/* SALÓN */}
-            <div className="hov" style={{ background: `linear-gradient(135deg,rgba(255,255,255,.04),rgba(201,168,76,.04))`, border: `1px solid rgba(201,168,76,.28)`, borderRadius: 14, overflow: "hidden", boxShadow: "0 6px 28px rgba(0,0,0,.35)" }}>
-              {/* Mini mapa embebido — reemplaza el src con el iframe de tu salón */}
-              <iframe
-                title="Salón"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3594!2d-100.2900!3d25.6700!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDQwJzEyLjAiTiAxMDDCsDE3JzI0LjAiVw!5e0!3m2!1ses!2smx!4v1234567891"
-                width="100%" height="160" style={{ border: 0, display: "block", filter: "invert(.9) hue-rotate(180deg) saturate(0.6)" }}
-                allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-              />
-              <div style={{ padding: "18px 20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 20 }}>🌹</span>
-                  <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".22em", color: C.gold }}>RECEPCIÓN</p>
-                </div>
-                <p style={{ fontSize: "clamp(14px,2.5vw,17px)", color: C.white, fontWeight: 600, marginBottom: 4 }}>
-                  Salón La Galería Eventos
-                </p>
-                <p style={{ fontSize: 12, color: C.goldLight, opacity: .7, marginBottom: 14 }}>
-                  {/* 👇 Cambia por la dirección del salón */}
-                  Av. Eventos #456, Colonia Las Flores
-                </p>
-                {/* 👇 Reemplaza el href con el link de Google Maps de tu salón */}
-                <a href="https://maps.google.com/?q=Salon+La+Galeria+Eventos+Monterrey" target="_blank" rel="noopener noreferrer" style={{
-                  display: "inline-flex", alignItems: "center", gap: 7,
-                  background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
-                  color: "#07101f", fontFamily: "'Cinzel',serif", fontSize: 9,
-                  letterSpacing: ".18em", fontWeight: 700, padding: "9px 18px",
-                  borderRadius: 6, textDecoration: "none", transition: "all .3s",
-                }}>
-                  📍 VER EN GOOGLE MAPS
-                </a>
-              </div>
-            </div>
-
+            ))}
           </div>
 
-          {/* Countdown */}
-          <div style={{ border: `1px solid rgba(201,168,76,.28)`, borderRadius: 14, padding: "26px 18px", background: `rgba(201,168,76,.05)`, marginBottom: 26 }}>
-            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".32em", color: C.gold, marginBottom: 18 }}>CUENTA REGRESIVA</p>
-            <div style={{ display: "flex", justifyContent: "center", gap: "clamp(14px,4vw,36px)" }}>
-              {[["DÍAS","d"],["HORAS","h"],["MIN","m"],["SEG","s"]].map(([lbl,k]) => (
-                <div key={k} style={{ textAlign: "center", minWidth: 48 }}>
-                  <p className="gt" style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(34px,9vw,54px)", fontWeight: 700, lineHeight: 1 }}>{String(countdown[k] ?? 0).padStart(2, "0")}</p>
-                  <p style={{ fontSize: "clamp(7px,1.4vw,9px)", letterSpacing: ".22em", color: C.gold, opacity: .65, marginTop: 5, fontFamily: "'Cinzel',serif" }}>{lbl}</p>
+          {/* ── Countdown ── */}
+          <div style={{ border: `1px solid rgba(201,168,76,.3)`, borderRadius: 18, padding: "22px 16px 26px", background: `linear-gradient(135deg, rgba(201,168,76,.06), rgba(1,136,164,.08))`, marginBottom: 28, position: "relative", overflow: "hidden" }}>
+            {/* Brillo de fondo */}
+            <div style={{ position: "absolute", top: -30, left: "50%", transform: "translateX(-50%)", width: 200, height: 60, background: `radial-gradient(ellipse, rgba(201,168,76,.15), transparent)`, pointerEvents: "none" }}/>
+            <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".35em", color: C.gold, marginBottom: 20 }}>✦ CUENTA REGRESIVA ✦</p>
+            <div style={{ display: "flex", justifyContent: "center", gap: "clamp(8px,3vw,28px)" }}>
+              {[["DÍAS","d"],["HORAS","h"],["MIN","m"],["SEG","s"]].map(([lbl,k], i) => (
+                <div key={k} style={{ textAlign: "center" }}>
+                  {/* Caja del número */}
+                  <div style={{ background: `linear-gradient(180deg, ${C.navyLight}, ${C.navy})`, border: `1px solid rgba(201,168,76,.35)`, borderRadius: 10, padding: "10px 14px", minWidth: "clamp(52px,12vw,68px)", marginBottom: 8, boxShadow: `0 4px 16px rgba(0,0,0,.3), inset 0 1px 0 rgba(201,168,76,.1)`, position: "relative", overflow: "hidden" }}>
+                    {/* Línea de brillo */}
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, rgba(201,168,76,.4), transparent)` }}/>
+                    <p className="gt" style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(28px,7vw,44px)", fontWeight: 700, lineHeight: 1 }}>
+                      {String(countdown[k] ?? 0).padStart(2, "0")}
+                    </p>
+                  </div>
+                  <p style={{ fontSize: "clamp(7px,1.4vw,9px)", letterSpacing: ".22em", color: C.gold, opacity: .7, fontFamily: "'Cinzel',serif" }}>{lbl}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <p style={{ fontSize: "clamp(14px,2.5vw,17px)", color: C.dim, fontStyle: "italic", lineHeight: 2 }}>
-            Después de la ceremonia, te esperamos en la recepción<br />para compartir esta noche tan especial.
-          </p>
-          <p style={{ marginTop: 14, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".28em", color: C.gold }}>✦ TU PRESENCIA ES EL MEJOR REGALO ✦</p>
+          {/* ── Ubicaciones rediseñadas ── */}
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.7vw,11px)", letterSpacing: ".42em", color: C.gold, marginBottom: 16 }}>— CÓMO LLEGAR —</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14, marginBottom: 24 }}>
+            {[
+              {
+                icon: "⛪", tag: "CEREMONIA", name: "Parroquia San Juan Bautista",
+                addr: "Av. Principal #123, Colonia Centro",
+                // 👇 Reemplaza con el link real de Google Maps de tu iglesia
+                url: "https://maps.google.com/?q=Parroquia+San+Juan+Bautista+Monterrey",
+                color: C.navyLight,
+              },
+              {
+                icon: "🌹", tag: "RECEPCIÓN", name: "Salón La Galería Eventos",
+                addr: "Av. Eventos #456, Colonia Las Flores",
+                // 👇 Reemplaza con el link real de Google Maps de tu salón
+                url: "https://maps.google.com/?q=Salon+La+Galeria+Eventos+Monterrey",
+                color: C.navyMid,
+              },
+            ].map((loc, i) => (
+              <div key={i} className="hov" style={{ borderRadius: 16, overflow: "hidden", border: `1px solid rgba(201,168,76,.28)`, boxShadow: "0 8px 32px rgba(0,0,0,.35)", background: `linear-gradient(160deg, ${loc.color}88, ${C.bg})` }}>
+                {/* Header decorativo */}
+                <div style={{ padding: "18px 20px 14px", borderBottom: `1px solid rgba(201,168,76,.15)`, display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: `rgba(201,168,76,.12)`, border: `1px solid rgba(201,168,76,.35)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{loc.icon}</div>
+                  <div style={{ textAlign: "left" }}>
+                    <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".25em", color: C.gold, marginBottom: 3 }}>{loc.tag}</p>
+                    <p style={{ fontSize: "clamp(13px,2.5vw,16px)", color: C.white, fontWeight: 600, lineHeight: 1.3 }}>{loc.name}</p>
+                  </div>
+                </div>
+                {/* Body */}
+                <div style={{ padding: "14px 20px 18px" }}>
+                  <p style={{ fontSize: 12, color: C.goldLight, opacity: .7, marginBottom: 14, textAlign: "left", lineHeight: 1.6 }}>📍 {loc.addr}</p>
+                  <a href={loc.url} target="_blank" rel="noopener noreferrer" className="loc-btn"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%",
+                      background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+                      color: "#012030", fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".2em",
+                      fontWeight: 700, padding: "11px 0", borderRadius: 8, textDecoration: "none",
+                      boxShadow: `0 4px 16px rgba(201,168,76,.3)`, transition: "all .3s",
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#012030" strokeWidth="2.5" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    ABRIR EN GOOGLE MAPS
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".28em", color: C.gold, opacity: .7 }}>✦ TU PRESENCIA ES EL MEJOR REGALO ✦</p>
         </div>
       </section>
 
