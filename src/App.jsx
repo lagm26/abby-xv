@@ -205,33 +205,56 @@ export default function QuinceInvitation() {
       @keyframes shimmer{0%{background-position:200% center;}100%{background-position:-200% center;}}
       @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.55);}65%{box-shadow:0 0 0 12px rgba(201,168,76,0);}}
       @keyframes glow{0%,100%{border-color:rgba(201,168,76,.25);}50%{border-color:rgba(201,168,76,.7);}}
-      @keyframes flipIn{from{transform:rotateX(90deg);opacity:0;}to{transform:rotateX(0deg);opacity:1;}}
-      @keyframes lineGrow{from{width:0;}to{width:100%;}}
-      @keyframes iconPop{0%{transform:scale(0) rotate(-20deg);opacity:0;}70%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0deg);opacity:1;}}
 
-      /* ── Transiciones entre secciones ── */
-      @keyframes curtainDown{0%{clip-path:inset(0 0 100% 0);}100%{clip-path:inset(0 0 0% 0);}}
-      @keyframes curtainUp{0%{clip-path:inset(0 0 0 0);opacity:1;}100%{clip-path:inset(100% 0 0 0);opacity:0;}}
-      @keyframes diamondIn{0%{clip-path:polygon(50% 50%,50% 50%,50% 50%,50% 50%);}100%{clip-path:polygon(50% -100%,200% 50%,50% 200%,-100% 50%);}}
-      @keyframes diamondOut{0%{clip-path:polygon(50% -100%,200% 50%,50% 200%,-100% 50%);opacity:1;}100%{clip-path:polygon(50% 50%,50% 50%,50% 50%,50% 50%);opacity:0;}}
-      @keyframes irisIn{0%{clip-path:circle(0% at 50% 50%);}100%{clip-path:circle(150% at 50% 50%);}}
-      @keyframes irisOut{0%{clip-path:circle(150% at 50% 50%);opacity:1;}100%{clip-path:circle(0% at 50% 50%);opacity:0;}}
-      @keyframes blindsIn{
-        0%{clip-path:inset(0 100% 0 0);}
-        100%{clip-path:inset(0 0% 0 0);}
+      /* ══ TRANSICIONES ELEGANTES — solo opacity + transform (GPU puro) ══ */
+
+      /* 1. Velo dorado — fade suave con bloom */
+      @keyframes veilIn {
+        0%   { opacity:0; transform:scale(1.04); filter:blur(12px); }
+        100% { opacity:1; transform:scale(1);    filter:blur(0px);  }
       }
-      @keyframes rippleIn{
-        0%{transform:scale(0);opacity:1;border-radius:50%;}
-        100%{transform:scale(40);opacity:0;border-radius:50%;}
+      @keyframes veilOut {
+        0%   { opacity:1; transform:scale(1);    filter:blur(0px);  }
+        100% { opacity:0; transform:scale(.97);  filter:blur(8px);  }
       }
 
-      .tx-overlay{position:fixed;inset:0;z-index:5000;pointer-events:none;}
-      .tx-diamond-in{animation:diamondIn .55s cubic-bezier(.77,0,.18,1) forwards;}
-      .tx-diamond-out{animation:diamondOut .45s cubic-bezier(.77,0,.18,1) .55s forwards;}
-      .tx-iris-in{animation:irisIn .5s cubic-bezier(.77,0,.18,1) forwards;}
-      .tx-iris-out{animation:irisOut .4s cubic-bezier(.77,0,.18,1) .5s forwards;}
-      .tx-curtain-in{animation:curtainDown .5s cubic-bezier(.77,0,.18,1) forwards;}
-      .tx-curtain-out{animation:curtainUp .4s cubic-bezier(.77,0,.18,1) .5s forwards;}
+      /* 2. Barrido de luz — línea de brillo que cruza de izq a der */
+      @keyframes sweepLine {
+        0%   { transform:translateX(-110%); }
+        100% { transform:translateX(110%);  }
+      }
+
+      /* 3. Partículas doradas que suben */
+      @keyframes riseGold {
+        0%   { opacity:0; transform:translateY(18px) scale(.95); filter:blur(6px);  }
+        60%  { opacity:1; filter:blur(0);  }
+        100% { opacity:1; transform:translateY(0)    scale(1);   filter:blur(0);    }
+      }
+
+      /* Clases de transición */
+      .tx-wrap {
+        position:fixed; inset:0; z-index:5000; pointer-events:none;
+        will-change:opacity,transform,filter;
+      }
+      .tx-veil-in  { animation: veilIn  .55s cubic-bezier(.4,0,.2,1) both; }
+      .tx-veil-out { animation: veilOut .45s cubic-bezier(.4,0,.2,1) both; }
+
+      /* Línea de barrido (hija del overlay) */
+      .tx-sweep {
+        position:absolute; inset:0; overflow:hidden;
+      }
+      .tx-sweep::after {
+        content:'';
+        position:absolute; top:0; bottom:0; width:35%;
+        background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(245,223,160,.18) 40%,
+          rgba(245,223,160,.55) 50%,
+          rgba(245,223,160,.18) 60%,
+          transparent 100%);
+        animation: sweepLine .65s cubic-bezier(.4,0,.2,1) .05s both;
+        will-change:transform;
+      }
 
       .gt{background:linear-gradient(90deg,#c9a84c,#f5dfa0,#e8c86d,#f5dfa0,#c9a84c);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;}
       .fu{animation:fadeUp .85s cubic-bezier(.16,1,.3,1) forwards;}
@@ -243,25 +266,16 @@ export default function QuinceInvitation() {
       .loc-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.4)!important;filter:brightness(1.1);}
       button:active{transform:scale(.97)!important;} input{outline:none!important;}
       input:focus{border-color:#c9a84c!important;box-shadow:0 0 0 2px rgba(201,168,76,.15)!important;}
-      .flip-num{animation:flipIn .4s ease forwards;display:inline-block;perspective:300px;}
-      .icon-pop{animation:iconPop .6s cubic-bezier(.34,1.56,.64,1) forwards;}
-      .line-grow::after{content:'';position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);animation:lineGrow 1.2s ease forwards;}
     `;
     document.head.appendChild(s);
     return () => document.head.removeChild(s);
   }, []);
 
-  // Transiciones únicas por sección: 0→diamante, 1→iris, 2→cortina, 3→iris, 4→diamante
-  const TX = ["tx-diamond","tx-iris","tx-curtain","tx-iris","tx-diamond"];
-  const TX_COLORS = [C.gold, C.navyLight, C.goldLight, C.navyLight, C.gold];
-
+  // ── Transición elegante: velo dorado con barrido de luz ──
   const fireTransition = (idx) => {
-    const type = TX[idx] || "tx-diamond";
-    const col  = TX_COLORS[idx] || C.gold;
-    setTxColor(col);
-    setTxClass(`${type}-in`);
-    setTimeout(() => setTxClass(`${type}-out`), 550);
-    setTimeout(() => setTxClass(""), 1000);
+    setTxClass("tx-veil-in");
+    setTimeout(() => setTxClass("tx-veil-out"), 480);
+    setTimeout(() => setTxClass(""), 960);
   };
 
   useEffect(() => {
@@ -274,7 +288,7 @@ export default function QuinceInvitation() {
           setVisible(v => ({ ...v, [i]: true }));
         }
       });
-    }, { threshold: 0.45 });
+    }, { threshold: 0.5 });
     secRefs.current.forEach(r => r && obs.observe(r));
     return () => obs.disconnect();
   }, []);
@@ -373,15 +387,29 @@ export default function QuinceInvitation() {
 
       <Sparkles />
 
-      {/* ── Overlay de transición entre secciones ── */}
+      {/* ── Velo de transición elegante ── */}
       {txClass && (
-        <div className={`tx-overlay ${txClass}`}
-          style={{ background: txColor === C.gold
-            ? `radial-gradient(circle at 50% 50%, ${C.goldPale}, ${C.gold})`
-            : `radial-gradient(circle at 50% 50%, ${C.navyLight}, ${C.navy})`,
-            opacity: .92
-          }}
-        />
+        <div className={`tx-wrap ${txClass}`} style={{
+          background: `linear-gradient(160deg,
+            rgba(1,58,74,.92) 0%,
+            rgba(201,168,76,.18) 45%,
+            rgba(1,82,101,.92) 100%)`,
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+        }}>
+          {/* Línea de luz que barre */}
+          <div className="tx-sweep" />
+          {/* Símbolo central sutil */}
+          <div style={{
+            position: "absolute", top: "50%", left: "50%",
+            transform: "translate(-50%,-50%)",
+            fontFamily: "'Great Vibes',cursive",
+            fontSize: "clamp(60px,15vw,100px)",
+            color: "rgba(201,168,76,.25)",
+            letterSpacing: ".1em",
+            userSelect: "none",
+          }}>Abby</div>
+        </div>
       )}
 
       {/* Botón música */}
@@ -446,9 +474,9 @@ export default function QuinceInvitation() {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
