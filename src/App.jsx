@@ -5,7 +5,7 @@ const FAMILY_NAME = getParam("familia") || "Familia Invitada";
 const MAX_GUESTS  = Math.max(1, parseInt(getParam("invitados") || "2"));
 
 // 👇 PEGA AQUÍ la URL de tu Google Apps Script (ver instrucciones abajo)
-const GOOGLE_SCRIPT_URL = "PEGA_AQUÍ_TU_URL";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5PRnXpotij_SyOqIdNx4LWeLjZndW2Rii3fPoTA56ixsO8vRk8Sf2kHW9loBx3YrJ/exec";
 
 const C = {
   bg: "#013a4a", navy: "#015265", navyMid: "#016a82", navyLight: "#0188a4",
@@ -539,7 +539,7 @@ export default function QuinceInvitation() {
       };
 
       // ── Enviar a Google Sheets via Apps Script ──
-      if (GOOGLE_SCRIPT_URL !== "PEGA_AQUÍ_TU_URL") {
+      if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbz5PRnXpotij_SyOqIdNx4LWeLjZndW2Rii3fPoTA56ixsO8vRk8Sf2kHW9loBx3YrJ/exec") {
         await fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors", // requerido para Apps Script
