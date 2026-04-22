@@ -1182,7 +1182,7 @@ export default function QuinceInvitation() {
                 <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".22em", color: C.gold, marginBottom: 12, textAlign: "left" }}>¿CONFIRMAS ASISTENCIA?</p>
                 <div style={{ display: "flex", gap: 10 }}>
                   {[{ v: true, icon: "🎉", txt: "Sí, asistiré" }, { v: false, icon: "💙", txt: "No podré ir" }].map(opt => (
-                    <button key={String(opt.v)} onClick={() => setAttending(opt.v)} style={{ flex: 1, padding: "14px 8px", borderRadius: 8, cursor: "pointer", border: `1px solid ${attending === opt.v ? C.gold : "rgba(201,168,76,.2)"}`, background: attending === opt.v ? `linear-gradient(135deg,rgba(201,168,76,.22),rgba(201,168,76,.08))` : "transparent", color: attending === opt.v ? C.gold : C.dim, fontFamily: "'Cormorant Garamond',serif", fontSize: "clamp(13px,2.5vw,16px)", transition: "all .3s" }}>{opt.icon} {opt.txt}</button>
+                    <button key={String(opt.v)} onClick={() => setAttending(opt.v)} style={{ flex: 1, padding: "16px 8px", borderRadius: 8, cursor: "pointer", border: `1px solid ${attending === opt.v ? C.gold : "rgba(201,168,76,.2)"}`, background: attending === opt.v ? `linear-gradient(135deg,rgba(201,168,76,.22),rgba(201,168,76,.08))` : "transparent", color: attending === opt.v ? C.gold : C.dim, fontFamily: "'Cinzel',serif", fontSize: "clamp(13px,3vw,16px)", letterSpacing: ".05em", transition: "all .3s" }}>{opt.icon} {opt.txt}</button>
                   ))}
                 </div>
               </div>
