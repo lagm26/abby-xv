@@ -898,9 +898,9 @@ export default function QuinceInvitation() {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
@@ -921,8 +921,8 @@ export default function QuinceInvitation() {
             <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: `linear-gradient(180deg, transparent, ${C.gold}, ${C.gold}, transparent)`, transform: "translateX(-50%)", opacity: .4 }}/>
 
             {[
-              { time: "4:00 PM", icon: "⛪", title: "Ceremonia Religiosa", desc: "Parroquia de San José Esposo de la Virgen María", side: "left" },
-              { time: "7:30 PM", icon: "🌹", title: "Recepción & Fiesta",  desc: "Salón La Galería Eventos",   side: "right" },
+              { time: "4:00 PM", icon: "church", title: "Ceremonia Religiosa", desc: "Parroquia de San José Esposo de la Virgen María", side: "left" },
+              { time: "7:30 PM", icon: "hall",   title: "Recepción & Fiesta",  desc: "Salón La Galería Eventos", side: "right" },
             ].map((ev, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: i === 0 ? 24 : 0 }}>
                 {/* Lado izquierdo */}
@@ -934,7 +934,44 @@ export default function QuinceInvitation() {
                   </>}
                 </div>
                 {/* Nodo central */}
-                <div style={{ width: 48, height: 48, borderRadius: "50%", border: `2px solid ${C.gold}`, background: `linear-gradient(135deg, ${C.navy}, ${C.navyLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0, boxShadow: `0 0 20px rgba(201,168,76,.35)`, zIndex: 1 }}>{ev.icon}</div>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", border: `2px solid ${C.gold}`, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 0 22px rgba(201,168,76,.4)`, zIndex: 1 }}>
+                  {ev.icon === "church" ? (
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#c9a84c" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                      {/* Cruz */}
+                      <line x1="14" y1="1" x2="14" y2="7"/>
+                      <line x1="11" y1="4" x2="17" y2="4"/>
+                      {/* Torre central */}
+                      <rect x="11" y="7" width="6" height="7" fill="none"/>
+                      {/* Nave principal */}
+                      <rect x="5" y="14" width="18" height="12" fill="none"/>
+                      {/* Puerta */}
+                      <path d="M12 26 L12 21 Q14 19 16 21 L16 26"/>
+                      {/* Ventana redonda */}
+                      <circle cx="14" cy="17" r="2" fill="none"/>
+                      {/* Escalones */}
+                      <line x1="3" y1="26" x2="25" y2="26"/>
+                    </svg>
+                  ) : (
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#c9a84c" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                      {/* Techo del salón */}
+                      <polyline points="2,11 14,3 26,11"/>
+                      {/* Cuerpo */}
+                      <rect x="4" y="11" width="20" height="15" fill="none"/>
+                      {/* Puerta doble */}
+                      <rect x="10" y="18" width="3.5" height="8" fill="none"/>
+                      <rect x="14.5" y="18" width="3.5" height="8" fill="none"/>
+                      {/* Ventanas */}
+                      <rect x="5.5" y="14" width="4" height="4" fill="none"/>
+                      <rect x="18.5" y="14" width="4" height="4" fill="none"/>
+                      {/* Banderines de fiesta */}
+                      <path d="M4 3 Q7 5 10 3 Q13 1 14 3" strokeWidth="1"/>
+                      <path d="M14 3 Q15 1 18 3 Q21 5 24 3" strokeWidth="1"/>
+                      {/* Destellos decorativos */}
+                      <circle cx="22" cy="8" r=".8" fill="#c9a84c" stroke="none"/>
+                      <circle cx="6"  cy="8" r=".8" fill="#c9a84c" stroke="none"/>
+                    </svg>
+                  )}
+                </div>
                 {/* Lado derecho */}
                 <div style={{ flex: 1, textAlign: "left", padding: "0 0 0 20px", opacity: ev.side === "right" ? 1 : .35 }}>
                   {ev.side === "right" && <>
@@ -999,25 +1036,47 @@ export default function QuinceInvitation() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14 }}>
             {[
               {
-                icon: "⛪", tag: "CEREMONIA · 4:00 PM",
+                icon: "church", tag: "CEREMONIA · 4:00 PM",
                 name: "Parroquia de San José\nEsposo de la Virgen María",
                 addr: "Av. Principal #123, Colonia Centro",
-                // 👇 Cambia este link por el de tu iglesia en Google Maps
                 url: "https://maps.google.com/?q=Parroquia+San+Jose+Esposo+Virgen+Maria+Monterrey",
                 color: C.navyLight,
               },
               {
-                icon: "🌹", tag: "RECEPCIÓN · 7:30 PM",
+                icon: "hall", tag: "RECEPCIÓN · 7:30 PM",
                 name: "Salón La Galería Eventos",
                 addr: "Av. Eventos #456, Colonia Las Flores",
-                // 👇 Cambia este link por el de tu salón en Google Maps
                 url: "https://maps.google.com/?q=Salon+La+Galeria+Eventos+Monterrey",
                 color: C.navyMid,
               },
             ].map((loc, i) => (
               <div key={i} className="hov" style={{ borderRadius: 16, overflow: "hidden", border: `1px solid rgba(201,168,76,.28)`, boxShadow: "0 8px 32px rgba(0,0,0,.35)", background: `linear-gradient(160deg, ${loc.color}88, ${C.bg})` }}>
                 <div style={{ padding: "18px 20px 14px", borderBottom: `1px solid rgba(201,168,76,.15)`, display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: `rgba(201,168,76,.12)`, border: `1px solid rgba(201,168,76,.35)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>{loc.icon}</div>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: "transparent", border: `1.5px solid rgba(201,168,76,.5)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 0 16px rgba(201,168,76,.2)` }}>
+                    {loc.icon === "church" ? (
+                      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="#c9a84c" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="14" y1="1" x2="14" y2="7"/><line x1="11" y1="4" x2="17" y2="4"/>
+                        <rect x="11" y="7" width="6" height="7" fill="none"/>
+                        <rect x="5" y="14" width="18" height="12" fill="none"/>
+                        <path d="M12 26 L12 21 Q14 19 16 21 L16 26"/>
+                        <circle cx="14" cy="17" r="2" fill="none"/>
+                        <line x1="3" y1="26" x2="25" y2="26"/>
+                      </svg>
+                    ) : (
+                      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="#c9a84c" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="2,11 14,3 26,11"/>
+                        <rect x="4" y="11" width="20" height="15" fill="none"/>
+                        <rect x="10" y="18" width="3.5" height="8" fill="none"/>
+                        <rect x="14.5" y="18" width="3.5" height="8" fill="none"/>
+                        <rect x="5.5" y="14" width="4" height="4" fill="none"/>
+                        <rect x="18.5" y="14" width="4" height="4" fill="none"/>
+                        <path d="M4 3 Q7 5 10 3 Q13 1 14 3" strokeWidth="1"/>
+                        <path d="M14 3 Q15 1 18 3 Q21 5 24 3" strokeWidth="1"/>
+                        <circle cx="22" cy="8" r=".8" fill="#c9a84c" stroke="none"/>
+                        <circle cx="6"  cy="8" r=".8" fill="#c9a84c" stroke="none"/>
+                      </svg>
+                    )}
+                  </div>
                   <div style={{ textAlign: "left" }}>
                     <p style={{ fontFamily: "'Cinzel',serif", fontSize: 7, letterSpacing: ".22em", color: C.gold, marginBottom: 4 }}>{loc.tag}</p>
                     <p style={{ fontSize: "clamp(13px,2.5vw,15px)", color: C.white, fontWeight: 600, lineHeight: 1.35, whiteSpace: "pre-line" }}>{loc.name}</p>
