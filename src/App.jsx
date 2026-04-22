@@ -348,6 +348,7 @@ const Carousel = () => {
 
 export default function QuinceInvitation() {
   const [active, setActive]         = useState(0);
+  const [envelope, setEnvelope]     = useState("closed"); // closed | opening | open
   const [attending, setAttending]   = useState(null);
   const [guestCount, setGuestCount] = useState(1);
   const [guestName, setGuestName]   = useState(FAMILY_NAME);
@@ -401,6 +402,22 @@ export default function QuinceInvitation() {
       @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.55);}65%{box-shadow:0 0 0 12px rgba(201,168,76,0);}}
       @keyframes glow{0%,100%{border-color:rgba(201,168,76,.25);}50%{border-color:rgba(201,168,76,.7);}}
 
+      /* ══ SOBRE ANIMADO ══ */
+      @keyframes envFloat{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-14px) rotate(1deg);}}
+      @keyframes flapOpen{0%{transform:rotateX(0deg);}100%{transform:rotateX(-180deg);}}
+      @keyframes letterRise{0%{transform:translateY(0);opacity:0;}100%{transform:translateY(-90px);opacity:1;}}
+      @keyframes screenFadeOut{0%{opacity:1;transform:scale(1);}100%{opacity:0;transform:scale(1.06);}}
+      @keyframes sealPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.6);}50%{box-shadow:0 0 0 14px rgba(201,168,76,0);}}
+      @keyframes confettiDrop{0%{opacity:1;transform:translateY(-20px) rotate(0deg);}100%{opacity:0;transform:translateY(120px) rotate(720deg);}}
+      @keyframes shimmerSeal{0%{background-position:200% center;}100%{background-position:-200% center;}}
+
+      .env-float{animation:envFloat 3s ease-in-out infinite;}
+      .env-float-stop{animation:none;}
+      .flap-open{animation:flapOpen .7s cubic-bezier(.4,0,.2,1) forwards;transform-origin:top center;}
+      .letter-rise{animation:letterRise .6s cubic-bezier(.16,1,.3,1) .4s forwards;opacity:0;}
+      .screen-out{animation:screenFadeOut .7s cubic-bezier(.4,0,.2,1) forwards;}
+      .seal-pulse{animation:sealPulse 1.8s ease-in-out infinite;}
+      @keyframes confettiDrop{0%{opacity:1;transform:translateY(-10px) rotate(0deg) scale(1);}100%{opacity:0;transform:translateY(200px) rotate(540deg) scale(.5);}}
       /* ══ TRANSICIONES ELEGANTES — solo opacity + transform (GPU puro) ══ */
 
       /* 1. Velo dorado — fade suave con bloom */
@@ -562,6 +579,22 @@ export default function QuinceInvitation() {
 
   const scrollTo = i => secRefs.current[i]?.scrollIntoView({ behavior: "smooth" });
 
+  // ── Abrir sobre ──
+  const openEnvelope = () => {
+    if (envelope !== "closed") return;
+    setEnvelope("opening");
+    setTimeout(() => setEnvelope("open"), 1500);
+  };
+
+  const confettiPieces = useMemo(() => Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    left: `${15 + Math.random() * 70}%`,
+    color: [C.gold, C.goldLight, C.goldPale, "#fff", "#c8f0ff"][i % 5],
+    size: Math.random() * 9 + 5,
+    delay: Math.random() * 0.5,
+    dur:   Math.random() * 0.7 + 0.7,
+  })), []);
+
   // ── Toca la pantalla → siguiente sección ──
   const handleScreenTap = (e) => {
     const tag = e.target.tagName.toLowerCase();
@@ -586,6 +619,159 @@ export default function QuinceInvitation() {
 
   return (
     <div onClick={handleScreenTap} style={{ background: C.bg, color: C.white, fontFamily: "'Cormorant Garamond',serif", minHeight: "100vh", overflowX: "hidden", cursor: "default" }}>
+
+      {/* ══════════════════════════════════════════════════════
+          PANTALLA DE SOBRE — aparece antes de la invitación
+      ══════════════════════════════════════════════════════ */}
+      {envelope !== "open" && (
+        <div className={envelope === "opening" ? "screen-out" : ""}
+          onClick={openEnvelope}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9000,
+            background: `radial-gradient(ellipse at 50% 40%, #0a2a38, #011820)`,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            cursor: "pointer", userSelect: "none",
+          }}>
+
+          {/* Partículas de fondo */}
+          <Sparkles />
+
+          {/* Confeti al abrir */}
+          {envelope === "opening" && confettiPieces.map(p => (
+            <div key={p.id} style={{
+              position: "absolute", top: "40%", left: p.left,
+              width: p.size, height: p.size,
+              background: p.color, borderRadius: p.size > 10 ? "50%" : 2,
+              animation: `confettiDrop ${p.dur}s ${p.delay}s ease-in forwards`,
+              zIndex: 10,
+            }}/>
+          ))}
+
+          {/* Texto superior */}
+          <p style={{
+            fontFamily: "'Cinzel',serif", fontSize: "clamp(9px,1.8vw,11px)",
+            letterSpacing: ".45em", color: C.gold, marginBottom: 40,
+            opacity: envelope === "opening" ? 0 : 1, transition: "opacity .3s",
+          }}>TIENES UNA INVITACIÓN</p>
+
+          {/* ── SOBRE SVG ── */}
+          <div className={envelope === "closed" ? "env-float" : "env-float-stop"}
+            style={{ position: "relative", width: "clamp(240px,65vw,320px)", cursor: "pointer" }}>
+
+            {/* Sombra del sobre */}
+            <div style={{
+              position: "absolute", bottom: -18, left: "10%", right: "10%", height: 20,
+              background: "rgba(0,0,0,.4)", borderRadius: "50%", filter: "blur(12px)",
+            }}/>
+
+            {/* Cuerpo del sobre */}
+            <svg viewBox="0 0 320 220" width="100%" style={{ display: "block", filter: `drop-shadow(0 12px 40px rgba(0,0,0,.6))` }}>
+              {/* Cuerpo */}
+              <rect x="0" y="30" width="320" height="190" rx="8" fill="#0d3244" stroke="#c9a84c" strokeWidth="1.5"/>
+              {/* Pliegues diagonales del fondo */}
+              <line x1="0" y1="220" x2="160" y2="120" stroke="#c9a84c" strokeWidth=".8" opacity=".35"/>
+              <line x1="320" y1="220" x2="160" y2="120" stroke="#c9a84c" strokeWidth=".8" opacity=".35"/>
+              {/* Triángulo inferior */}
+              <polygon points="0,220 160,120 320,220" fill="#0a2a38" stroke="#c9a84c" strokeWidth=".8" opacity=".6"/>
+              {/* Línea separadora superior del cuerpo */}
+              <line x1="0" y1="30" x2="320" y2="30" stroke="#c9a84c" strokeWidth=".8" opacity=".4"/>
+
+              {/* SOLAPA — se dobla hacia atrás al abrir */}
+              <g style={{ transformOrigin: "160px 30px", transformBox: "fill-box" }}
+                className={envelope === "opening" ? "flap-open" : ""}>
+                <polygon points="0,30 160,130 320,30" fill="#0f3a52" stroke="#c9a84c" strokeWidth="1.2"/>
+                {/* Textura de la solapa */}
+                <line x1="60" y1="42" x2="160" y2="105" stroke="#c9a84c" strokeWidth=".4" opacity=".2"/>
+                <line x1="260" y1="42" x2="160" y2="105" stroke="#c9a84c" strokeWidth=".4" opacity=".2"/>
+              </g>
+
+              {/* Borde dorado decorativo del sobre */}
+              <rect x="6" y="36" width="308" height="178" rx="5" fill="none" stroke="#c9a84c" strokeWidth=".5" opacity=".3" strokeDasharray="4 4"/>
+            </svg>
+
+            {/* ── SELLO DE CERA ── */}
+            <div className="seal-pulse" style={{
+              position: "absolute",
+              top: "38%", left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "clamp(64px,18vw,84px)",
+              height: "clamp(64px,18vw,84px)",
+              borderRadius: "50%",
+              background: `radial-gradient(circle at 35% 35%, #e8c86d, #9a6e1a, #5a3d08)`,
+              border: "3px solid #c9a84c",
+              boxShadow: `0 4px 20px rgba(0,0,0,.5), inset 0 2px 4px rgba(245,223,160,.3)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              zIndex: 5,
+            }}>
+              {/* Letra A en el sello */}
+              <p style={{
+                fontFamily: "'Great Vibes',cursive",
+                fontSize: "clamp(30px,8vw,42px)",
+                color: "#f5dfa0",
+                textShadow: "0 1px 3px rgba(0,0,0,.5)",
+                lineHeight: 1,
+              }}>A</p>
+              {/* Círculo del borde del sello */}
+              <div style={{
+                position: "absolute", inset: 4, borderRadius: "50%",
+                border: "1.5px solid rgba(245,223,160,.5)",
+              }}/>
+              {/* Estrellas decorativas en el sello */}
+              {[0,72,144,216,288].map(deg => (
+                <div key={deg} style={{
+                  position: "absolute", width: 3, height: 3, borderRadius: "50%",
+                  background: "#f5dfa0", opacity: .7,
+                  top: `calc(50% + ${Math.sin(deg*Math.PI/180)*26}px)`,
+                  left: `calc(50% + ${Math.cos(deg*Math.PI/180)*26}px)`,
+                  transform: "translate(-50%,-50%)",
+                }}/>
+              ))}
+            </div>
+
+            {/* Carta que asoma al abrir */}
+            {envelope === "opening" && (
+              <div className="letter-rise" style={{
+                position: "absolute", top: 0, left: "15%", right: "15%",
+                background: `linear-gradient(160deg, #f5dfa0, #e8c86d)`,
+                borderRadius: 4, padding: "14px 18px", zIndex: 3,
+                boxShadow: "0 -8px 30px rgba(201,168,76,.4)",
+                textAlign: "center",
+              }}>
+                <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(18px,5vw,26px)", color: "#0d3244" }}>
+                  Con cariño para ti...
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Texto inferior — instrucción */}
+          <div style={{
+            marginTop: 44, textAlign: "center",
+            opacity: envelope === "opening" ? 0 : 1,
+            transition: "opacity .3s",
+          }}>
+            <p style={{
+              fontFamily: "'Great Vibes',cursive",
+              fontSize: "clamp(22px,5vw,30px)",
+              color: C.goldLight,
+              marginBottom: 10,
+            }}>
+              {FAMILY_NAME !== "Familia Invitada" ? FAMILY_NAME : "Tu invitación te espera"}
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", opacity: .55 }}>
+              <div style={{ width: 30, height: 1, background: C.gold }}/>
+              <p style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".3em", color: C.gold }}>
+                TOCA PARA ABRIR
+              </p>
+              <div style={{ width: 30, height: 1, background: C.gold }}/>
+            </div>
+          </div>
+
+          {/* Esquinas del sobre */}
+          <Corners size={130}/>
+        </div>
+      )}
 
       {/* 🎵 CANCIÓN DE FONDO
            Opciones para agregar "Best Day of My Life" de American Authors
@@ -712,9 +898,9 @@ export default function QuinceInvitation() {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
