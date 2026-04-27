@@ -5,7 +5,7 @@ const FAMILY_NAME = getParam("familia") || "Familia Invitada";
 const MAX_GUESTS  = Math.max(1, parseInt(getParam("invitados") || "2"));
 
 // 👇 PEGA AQUÍ la URL de tu Google Apps Script (ver instrucciones abajo)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-a5de575ygIjzE7FnYAna2qmS7UYCpWsC-e6HT6wPSjgdpWKd8G5JgLx9_1TFiEmc/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuTROAtXyIOs9krd_QRomVwFUtTMUGCNLJjyJUjk146jFJnCTi52_CmRhC0hpq9-Xd/exec";
 
 const C = {
   bg: "#013a4a", navy: "#015265", navyMid: "#016a82", navyLight: "#0188a4",
@@ -536,7 +536,7 @@ export default function QuinceInvitation() {
   };
 
   const loadRsvps = async () => {
-    if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycby-a5de575ygIjzE7FnYAna2qmS7UYCpWsC-e6HT6wPSjgdpWKd8G5JgLx9_1TFiEmc/exec") return;
+    if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzuTROAtXyIOs9krd_QRomVwFUtTMUGCNLJjyJUjk146jFJnCTi52_CmRhC0hpq9-Xd/exec") return;
     setLoadingRsvps(true);
     try {
       const url = `${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`;
