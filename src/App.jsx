@@ -506,47 +506,57 @@ export default function QuinceInvitation() {
   }, []);
 
   useEffect(() => {
-  loadRsvps();
-}, []);
+    loadRsvps();
+  }, []);
 
-const loadRsvps = async () => {
-  if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbwDDk7Rl66yjTJK7O7QJRQK0BNU04IwSyqD9XXw4JLgJYJM1H2OxnZ55w2vChtWOJnk/exec") return;
-  try {
-    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get`);
-    const json = await res.json();
-    if (Array.isArray(json)) setAllRsvps(json);
-  } catch (e) {
-    console.error("Error cargando RSVPs:", e);
-  }
-};
+  const submitRsvp = async () => {
+    setSubmitting(true);
+    try {
+      const data = {
+        familia:    guestName || FAMILY_NAME,
+        asistencia: attending ? "Sí asiste" : "No asiste",
+        personas:   attending ? guestCount : 0,
+        fecha:      new Date().toLocaleDateString("es-MX"),
+        hora:       new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
+        attending,
+      };
 
-const submitRsvp = async () => {
-  setSubmitting(true);
-  try {
-    const data = {
-      familia:    guestName || FAMILY_NAME,
-      asistencia: attending ? "Sí asiste" : "No asiste",
-      personas:   attending ? guestCount : 0,
-      fecha:      new Date().toLocaleDateString("es-MX"),
-      hora:       new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
-      attending,
-    };
-    await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    setSubmitted(true);
-    setTimeout(() => loadRsvps(), 2000);
-  } catch (err) {
-    console.error("Error al enviar:", err);
-    setSubmitted(true);
-  } finally {
-    setSubmitting(false);
-  }
-};
+      if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbwDDk7Rl66yjTJK7O7QJRQK0BNU04IwSyqD9XXw4JLgJYJM1H2OxnZ55w2vChtWOJnk/exec") {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
 
+      setSubmitted(true);
+      // Recargar conteo después de 1.5s (tiempo para que Sheets procese)
+      setTimeout(() => loadRsvps(), 1500);
+
+    } catch (err) {
+      console.error("Error al enviar:", err);
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const loadRsvps = async () => {
+    if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbwDDk7Rl66yjTJK7O7QJRQK0BNU04IwSyqD9XXw4JLgJYJM1H2OxnZ55w2vChtWOJnk/exec") return;
+    try {
+      const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`);
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        if (Array.isArray(json)) setAllRsvps(json);
+      } catch {
+        console.error("Respuesta no es JSON:", text);
+      }
+    } catch (e) {
+      console.error("Error cargando RSVPs:", e);
+    }
+  };
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -591,7 +601,7 @@ const submitRsvp = async () => {
   const footerTap = () => setAdminTaps(t => { if (t + 1 >= 5) { setShowAdmin(true); loadRsvps(); return 0; } return t + 1; });
   const rv = i => visible[i] ? "fu" : "";
 
-  const totalGuests   = allRsvps.filter(r => r.attending).reduce((s, r) => s + (r.guests || 0), 0);
+  const totalGuests   = allRsvps.filter(r => r.attending).reduce((s, r) => s + (Number(r.personas) || 0), 0);
   const totalFamilies = allRsvps.filter(r => r.attending).length;
 
   const sec = (i, extra = {}) => ({
@@ -882,9 +892,9 @@ const submitRsvp = async () => {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
@@ -1208,7 +1218,10 @@ const submitRsvp = async () => {
                 <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".32em", color: C.gold, marginBottom: 4 }}>PANEL PRIVADO</p>
                 <h2 style={{ fontFamily: "'Cinzel',serif", color: C.white, fontSize: 20, letterSpacing: ".1em" }}>Confirmaciones</h2>
               </div>
-              <button onClick={() => setShowAdmin(false)} className="gh" style={{ background: "transparent", border: `1px solid rgba(201,168,76,.4)`, color: C.gold, padding: "8px 18px", cursor: "pointer", borderRadius: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".15em", transition: "all .25s" }}>✕ CERRAR</button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={loadRsvps} className="gh" style={{ background: "transparent", border: `1px solid rgba(201,168,76,.4)`, color: C.gold, padding: "8px 14px", cursor: "pointer", borderRadius: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", transition: "all .25s" }}>↻ RECARGAR</button>
+                <button onClick={() => setShowAdmin(false)} className="gh" style={{ background: "transparent", border: `1px solid rgba(201,168,76,.4)`, color: C.gold, padding: "8px 18px", cursor: "pointer", borderRadius: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".15em", transition: "all .25s" }}>✕ CERRAR</button>
+              </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 22 }}>
@@ -1231,11 +1244,11 @@ const submitRsvp = async () => {
                   <div key={i} style={{ background: r.attending ? "rgba(201,168,76,.08)" : "rgba(255,255,255,.025)", border: `1px solid ${r.attending ? "rgba(201,168,76,.28)" : "rgba(255,255,255,.07)"}`, borderRadius: 10, padding: "15px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <p style={{ color: C.white, fontSize: 16, marginBottom: 3 }}>{r.familia}</p>
-                      <p style={{ fontSize: 11, color: C.gold, opacity: .5 }}>{r.date} · {r.time}</p>
+                      <p style={{ fontSize: 11, color: C.gold, opacity: .5 }}>{r.fecha} · {r.hora}</p>
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <p style={{ fontSize: 20 }}>{r.attending ? "✅" : "❌"}</p>
-                      <p style={{ fontSize: 13, color: r.attending ? C.gold : C.dim, opacity: r.attending ? 1 : .45 }}>{r.attending ? `${r.guests} pers.` : "No asiste"}</p>
+                      <p style={{ fontSize: 13, color: r.attending ? C.gold : C.dim, opacity: r.attending ? 1 : .45 }}>{r.attending ? `${r.personas} pers.` : "No asiste"}</p>
                     </div>
                   </div>
                 ))
