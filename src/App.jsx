@@ -5,7 +5,7 @@ const FAMILY_NAME = getParam("familia") || "Familia Invitada";
 const MAX_GUESTS  = Math.max(1, parseInt(getParam("invitados") || "2"));
 
 // 👇 PEGA AQUÍ la URL de tu Google Apps Script (ver instrucciones abajo)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyADTir4GoLevg9tefsmhbON9pewZkK_VBTd2ZfFAc-HfHaixt_b7ARJrKfEvSwj8ml/exec";
+const GOOGLE_SCRIPT_URL = "PEGA_AQUÍ_TU_URL";
 
 const C = {
   bg: "#013a4a", navy: "#015265", navyMid: "#016a82", navyLight: "#0188a4",
@@ -356,6 +356,7 @@ export default function QuinceInvitation() {
   const [submitting, setSubmitting] = useState(false);
   const [allRsvps, setAllRsvps]     = useState([]);
   const [loadingRsvps, setLoadingRsvps] = useState(false);
+  const [rsvpError, setRsvpError]       = useState("");
   const [showAdmin, setShowAdmin]   = useState(false);
   const [adminTaps, setAdminTaps]   = useState(0);
   const [photos, setPhotos]         = useState(Array(6).fill(null));
@@ -535,24 +536,43 @@ export default function QuinceInvitation() {
     }
   };
 
-  const loadRsvps = async () => {
-    if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyADTir4GoLevg9tefsmhbON9pewZkK_VBTd2ZfFAc-HfHaixt_b7ARJrKfEvSwj8ml/exec") return;
+  const loadRsvps = () => {
+    if (GOOGLE_SCRIPT_URL === "PEGA_AQUÍ_TU_URL") return;
     setLoadingRsvps(true);
-    try {
-      const url = `${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`;
-      const res = await fetch(url, {
-        method: "GET",
-        redirect: "follow",
-        credentials: "omit",
-      });
-      const text = await res.text();
-      const json = JSON.parse(text);
-      if (Array.isArray(json)) setAllRsvps(json);
-    } catch (e) {
-      console.error("Error cargando RSVPs:", e);
-    } finally {
+    let done = false;
+
+    const tryFetch = () => {
+      fetch(`${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`, { redirect: "follow" })
+        .then(r => r.text())
+        .then(text => {
+          // Limpia posible wrapper JSONP si viene así
+          const clean = text.replace(/^[^[{]*/, "").replace(/[^}\]]*$/, "");
+          const json = JSON.parse(clean);
+          if (Array.isArray(json)) setAllRsvps(json);
+        })
+        .catch(err => console.error("Fetch error:", err))
+        .finally(() => setLoadingRsvps(false));
+    };
+
+    // JSONP primero
+    const cbName = `cb${Date.now()}`;
+    const script = document.createElement("script");
+
+    window[cbName] = (data) => {
+      done = true;
+      if (Array.isArray(data)) setAllRsvps(data);
       setLoadingRsvps(false);
-    }
+      delete window[cbName];
+      script.parentNode && script.remove();
+    };
+
+    script.src = `${GOOGLE_SCRIPT_URL}?action=get&callback=${cbName}&t=${Date.now()}`;
+    script.onerror = () => { done = true; tryFetch(); delete window[cbName]; script.parentNode && script.remove(); };
+
+    // Si en 4s no responde el JSONP, usar fetch
+    setTimeout(() => { if (!done) { done = true; tryFetch(); delete window[cbName]; script.parentNode && script.remove(); } }, 4000);
+
+    document.body.appendChild(script);
   };
 
   const toggleMusic = () => {
@@ -1243,11 +1263,17 @@ export default function QuinceInvitation() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {loadingRsvps
                 ? <p style={{ textAlign: "center", color: C.gold, opacity: .55, fontStyle: "italic", padding: 40 }}>Cargando confirmaciones...</p>
-                : allRsvps.length === 0
-                  ? <div style={{ textAlign: "center", padding: 40 }}>
-                      <p style={{ color: C.gold, opacity: .45, fontStyle: "italic", marginBottom: 12 }}>No se encontraron confirmaciones</p>
-                      <p style={{ color: C.gold, opacity: .3, fontSize: 11, fontFamily: "'Cinzel',serif", letterSpacing: ".1em" }}>Toca "PROBAR URL" para verificar la conexión con Google Sheets</p>
+                : rsvpError
+                  ? <div style={{ textAlign: "center", padding: 30, border: `1px solid rgba(255,80,80,.3)`, borderRadius: 10, background: "rgba(255,0,0,.05)" }}>
+                      <p style={{ color: "#ff8080", fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: ".15em", marginBottom: 10 }}>⚠ ERROR AL LEER</p>
+                      <p style={{ color: C.dim, fontSize: 13, fontStyle: "italic" }}>{rsvpError}</p>
+                      <p style={{ color: C.gold, opacity: .4, fontSize: 11, marginTop: 10 }}>Abre la consola del navegador (F12) para más detalles</p>
                     </div>
+                  : allRsvps.length === 0
+                    ? <div style={{ textAlign: "center", padding: 40 }}>
+                        <p style={{ color: C.gold, opacity: .45, fontStyle: "italic", marginBottom: 12 }}>No se encontraron confirmaciones</p>
+                        <p style={{ color: C.gold, opacity: .3, fontSize: 11, fontFamily: "'Cinzel',serif", letterSpacing: ".1em" }}>Toca "PROBAR URL" para verificar la conexión</p>
+                      </div>
                 : allRsvps.map((r, i) => (
                   <div key={i} style={{ background: r.attending ? "rgba(201,168,76,.08)" : "rgba(255,255,255,.025)", border: `1px solid ${r.attending ? "rgba(201,168,76,.28)" : "rgba(255,255,255,.07)"}`, borderRadius: 10, padding: "15px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
