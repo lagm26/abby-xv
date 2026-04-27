@@ -5,7 +5,7 @@ const FAMILY_NAME = getParam("familia") || "Familia Invitada";
 const MAX_GUESTS  = Math.max(1, parseInt(getParam("invitados") || "2"));
 
 // 👇 PEGA AQUÍ la URL de tu Google Apps Script (ver instrucciones abajo)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwInVwHigTXG6rJsLdozMugqk_-LVB_4cqzyL0fMofVQjQktVAA9eHXYuusj1iMtWUK/exec";
+const GOOGLE_SCRIPT_URL = "PEGA_AQUÍ_TU_URL";
 
 const C = {
   bg: "#013a4a", navy: "#015265", navyMid: "#016a82", navyLight: "#0188a4",
@@ -355,6 +355,7 @@ export default function QuinceInvitation() {
   const [submitted, setSubmitted]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [allRsvps, setAllRsvps]     = useState([]);
+  const [loadingRsvps, setLoadingRsvps] = useState(false);
   const [showAdmin, setShowAdmin]   = useState(false);
   const [adminTaps, setAdminTaps]   = useState(0);
   const [photos, setPhotos]         = useState(Array(6).fill(null));
@@ -512,27 +513,19 @@ export default function QuinceInvitation() {
   const submitRsvp = async () => {
     setSubmitting(true);
     try {
-      const data = {
-        familia:    guestName || FAMILY_NAME,
+      const params = new URLSearchParams({
+        action:    "save",
+        familia:   guestName || FAMILY_NAME,
         asistencia: attending ? "Sí asiste" : "No asiste",
-        personas:   attending ? guestCount : 0,
-        fecha:      new Date().toLocaleDateString("es-MX"),
-        hora:       new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
-        attending,
-      };
+        personas:  attending ? guestCount : 0,
+        fecha:     new Date().toLocaleDateString("es-MX"),
+        hora:      new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
+        attending: attending ? "true" : "false",
+      });
 
-      if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbwInVwHigTXG6rJsLdozMugqk_-LVB_4cqzyL0fMofVQjQktVAA9eHXYuusj1iMtWUK/exec") {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-      }
-
+      await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`);
       setSubmitted(true);
-      // Recargar conteo después de 1.5s (tiempo para que Sheets procese)
-      setTimeout(() => loadRsvps(), 1500);
+      setTimeout(() => loadRsvps(), 2000);
 
     } catch (err) {
       console.error("Error al enviar:", err);
@@ -543,18 +536,22 @@ export default function QuinceInvitation() {
   };
 
   const loadRsvps = async () => {
-    if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbwInVwHigTXG6rJsLdozMugqk_-LVB_4cqzyL0fMofVQjQktVAA9eHXYuusj1iMtWUK/exec") return;
+    if (GOOGLE_SCRIPT_URL === "PEGA_AQUÍ_TU_URL") return;
+    setLoadingRsvps(true);
     try {
-      const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`);
+      const url = `${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`;
+      const res = await fetch(url, {
+        method: "GET",
+        redirect: "follow",
+        credentials: "omit",
+      });
       const text = await res.text();
-      try {
-        const json = JSON.parse(text);
-        if (Array.isArray(json)) setAllRsvps(json);
-      } catch {
-        console.error("Respuesta no es JSON:", text);
-      }
+      const json = JSON.parse(text);
+      if (Array.isArray(json)) setAllRsvps(json);
     } catch (e) {
       console.error("Error cargando RSVPs:", e);
+    } finally {
+      setLoadingRsvps(false);
     }
   };
 
@@ -1218,8 +1215,14 @@ export default function QuinceInvitation() {
                 <p style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".32em", color: C.gold, marginBottom: 4 }}>PANEL PRIVADO</p>
                 <h2 style={{ fontFamily: "'Cinzel',serif", color: C.white, fontSize: 20, letterSpacing: ".1em" }}>Confirmaciones</h2>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={loadRsvps} className="gh" style={{ background: "transparent", border: `1px solid rgba(201,168,76,.4)`, color: C.gold, padding: "8px 14px", cursor: "pointer", borderRadius: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", transition: "all .25s" }}>↻ RECARGAR</button>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button onClick={loadRsvps} className="gh" style={{ background: "transparent", border: `1px solid rgba(201,168,76,.4)`, color: C.gold, padding: "8px 14px", cursor: "pointer", borderRadius: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", transition: "all .25s" }}>
+                  {loadingRsvps ? "CARGANDO..." : "↻ RECARGAR"}
+                </button>
+                <a href={`${GOOGLE_SCRIPT_URL}?action=get`} target="_blank" rel="noopener noreferrer"
+                  style={{ background: "transparent", border: `1px solid rgba(201,168,76,.25)`, color: C.dimWhite, padding: "8px 14px", cursor: "pointer", borderRadius: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", textDecoration: "none", display: "flex", alignItems: "center" }}>
+                  🔗 PROBAR URL
+                </a>
                 <button onClick={() => setShowAdmin(false)} className="gh" style={{ background: "transparent", border: `1px solid rgba(201,168,76,.4)`, color: C.gold, padding: "8px 18px", cursor: "pointer", borderRadius: 6, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".15em", transition: "all .25s" }}>✕ CERRAR</button>
               </div>
             </div>
@@ -1238,8 +1241,13 @@ export default function QuinceInvitation() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {allRsvps.length === 0
-                ? <p style={{ textAlign: "center", color: C.gold, opacity: .45, fontStyle: "italic", padding: 40 }}>Aún no hay confirmaciones</p>
+              {loadingRsvps
+                ? <p style={{ textAlign: "center", color: C.gold, opacity: .55, fontStyle: "italic", padding: 40 }}>Cargando confirmaciones...</p>
+                : allRsvps.length === 0
+                  ? <div style={{ textAlign: "center", padding: 40 }}>
+                      <p style={{ color: C.gold, opacity: .45, fontStyle: "italic", marginBottom: 12 }}>No se encontraron confirmaciones</p>
+                      <p style={{ color: C.gold, opacity: .3, fontSize: 11, fontFamily: "'Cinzel',serif", letterSpacing: ".1em" }}>Toca "PROBAR URL" para verificar la conexión con Google Sheets</p>
+                    </div>
                 : allRsvps.map((r, i) => (
                   <div key={i} style={{ background: r.attending ? "rgba(201,168,76,.08)" : "rgba(255,255,255,.025)", border: `1px solid ${r.attending ? "rgba(201,168,76,.28)" : "rgba(255,255,255,.07)"}`, borderRadius: 10, padding: "15px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
