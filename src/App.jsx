@@ -506,63 +506,47 @@ export default function QuinceInvitation() {
   }, []);
 
   useEffect(() => {
-    loadRsvps();
-    (async () => {
-      try {
-        const key = `rsvp-${FAMILY_NAME.toLowerCase().replace(/\s+/g, "-")}`;
-        const r = await window.storage.get(key, true);
-        if (r) { const d = JSON.parse(r.value); setAttending(d.attending); setGuestCount(d.guests || 1); setSubmitted(true); }
-      } catch {}
-    })();
-  }, []);
+  loadRsvps();
+}, []);
 
-  const loadRsvps = async () => {
-    try {
-      const list = await window.storage.list("rsvp-", true);
-      if (!list?.keys?.length) return;
-      const data = await Promise.all(list.keys.map(async k => {
-        try { const r = await window.storage.get(k, true); return r ? JSON.parse(r.value) : null; } catch { return null; }
-      }));
-      setAllRsvps(data.filter(Boolean));
-    } catch {}
-  };
+const loadRsvps = async () => {
+  if (GOOGLE_SCRIPT_URL === "PEGA_AQUÍ_TU_URL") return;
+  try {
+    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get`);
+    const json = await res.json();
+    if (Array.isArray(json)) setAllRsvps(json);
+  } catch (e) {
+    console.error("Error cargando RSVPs:", e);
+  }
+};
 
-  const submitRsvp = async () => {
-    setSubmitting(true);
-    try {
-      const data = {
-        familia:   guestName || FAMILY_NAME,
-        asistencia: attending ? "Sí asiste" : "No asiste",
-        personas:  attending ? guestCount : 0,
-        fecha:     new Date().toLocaleDateString("es-MX"),
-        hora:      new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
-      };
+const submitRsvp = async () => {
+  setSubmitting(true);
+  try {
+    const data = {
+      familia:    guestName || FAMILY_NAME,
+      asistencia: attending ? "Sí asiste" : "No asiste",
+      personas:   attending ? guestCount : 0,
+      fecha:      new Date().toLocaleDateString("es-MX"),
+      hora:       new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
+      attending,
+    };
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    setSubmitted(true);
+    setTimeout(() => loadRsvps(), 2000);
+  } catch (err) {
+    console.error("Error al enviar:", err);
+    setSubmitted(true);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
-      // ── Enviar a Google Sheets via Apps Script ──
-      if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbwOLQxB7bt8ADCZnizFGp4HlROA59QSliAf5vWehmse4Lu07U4QDgoZ5xaIV9-5JdQ8/exec") {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors", // requerido para Apps Script
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-      }
-
-      // ── También guardar localmente (panel admin) ──
-      try {
-        const key = `rsvp-${(guestName || FAMILY_NAME).toLowerCase().replace(/\s+/g, "-")}`;
-        await window.storage.set(key, JSON.stringify({ ...data, attending }), true);
-        await loadRsvps();
-      } catch {}
-
-      setSubmitted(true);
-    } catch (err) {
-      console.error("Error al enviar:", err);
-      setSubmitted(true); // Mostrar éxito igual para no frustrar al usuario
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
