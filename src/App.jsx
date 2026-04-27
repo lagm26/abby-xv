@@ -886,9 +886,9 @@ export default function QuinceInvitation() {
           <Divider />
           <div className="hov" style={{ border: `1px solid rgba(201,168,76,.26)`, borderRadius: 14, padding: "32px 36px", background: `rgba(201,168,76,.04)`, boxShadow: "0 6px 28px rgba(0,0,0,.3)", width: "100%" }}>
             <p style={{ fontFamily: "'Cinzel',serif", fontSize: "clamp(8px,1.6vw,10px)", letterSpacing: ".32em", color: C.gold, marginBottom: 20 }}>CON LA PRESENCIA DE MIS PADRES</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>María José Hernández</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Luis Abdiel Gámez M.</p>
             <p style={{ color: C.gold, margin: "4px 0", fontSize: 24 }}>&</p>
-            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Carlos Alberto Martínez</p>
+            <p style={{ fontFamily: "'Great Vibes',cursive", fontSize: "clamp(30px,7vw,44px)", color: C.goldLight, lineHeight: 1.5 }}>Alejandra Isabel Amaya S.</p>
           </div>
           <div style={{ color: C.gold, fontSize: 22, opacity: .42 }}>✦</div>
         </div>
