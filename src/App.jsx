@@ -537,22 +537,18 @@ export default function QuinceInvitation() {
   };
 
   const loadRsvps = () => {
-    if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyADTir4GoLevg9tefsmhbON9pewZkK_VBTd2ZfFAc-HfHaixt_b7ARJrKfEvSwj8ml/exec") return;
-    setLoadingRsvps(true);
-    let done = false;
-
-    const tryFetch = () => {
-      fetch(`${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`, { redirect: "follow" })
-        .then(r => r.text())
-        .then(text => {
-          // Limpia posible wrapper JSONP si viene así
-          const clean = text.replace(/^[^[{]*/, "").replace(/[^}\]]*$/, "");
-          const json = JSON.parse(clean);
-          if (Array.isArray(json)) setAllRsvps(json);
-        })
-        .catch(err => console.error("Fetch error:", err))
-        .finally(() => setLoadingRsvps(false));
-    };
+  setLoadingRsvps(true);
+  const cbName = "rsvpLoad" + Date.now();
+  const script = document.createElement("script");
+  window[cbName] = (data) => {
+    if (Array.isArray(data)) setAllRsvps(data);
+    setLoadingRsvps(false);
+    delete window[cbName];
+    script.remove();
+  };
+  script.src = `${GOOGLE_SCRIPT_URL}?action=get&callback=${cbName}`;
+  document.body.appendChild(script);
+};
 
     // JSONP primero
     const cbName = `cb${Date.now()}`;
