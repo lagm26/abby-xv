@@ -1031,15 +1031,15 @@ export default function QuinceInvitation() {
               {
                 icon: "church", tag: "CEREMONIA · 4:00 PM",
                 name: "Parroquia de San José\nEsposo de la Virgen María",
-                addr: "Av. Principal #123, Colonia Centro",
+                addr: "Paseo Virrey de Cevallos No. 210 Rinconada Colonial, Apodaca, México",
                 url: "https://maps.google.com/?q=Parroquia+San+Jose+Esposo+Virgen+Maria+Monterrey",
                 color: C.navyLight,
               },
               {
                 icon: "hall", tag: "RECEPCIÓN · 7:30 PM",
                 name: "Salón La Galería Eventos",
-                addr: "Av. Eventos #456, Colonia Las Flores",
-                url: "https://maps.google.com/?q=Salon+La+Galeria+Eventos+Monterrey",
+                addr: "Boulevard Benito Juárez #501, La Encomienda",
+                url: "https://maps.app.goo.gl/rENMwzdjnYeqS8P77",
                 color: C.navyMid,
               },
             ].map((loc, i) => (
